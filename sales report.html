@@ -225,10 +225,8 @@
       <p >This bar graph represents the Average Keywords for each Articles Section depending on the number of K Means Cluster. </p>
       <p> This bar graph interprets that the higher the value of the Average Keywords, the easier the keywords could be find within the article for each of the Article's sections. </p> <br>
     </div>
-
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small">
-      <h2>The List of Articles</h2>
-    </header>
+    
+    <div class="w3-container w3-blue-grey w3-padding-small" style="font-size:30px" id="table_des"></div>
 	  <div class="bk-root" style="margin-top:10px" id="table"></div>
 	</div>
       </div>
@@ -249,49 +247,37 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
 
-      url = 'karelchandra/data_analisa 2021-2022/group_month_ps.csv'
+      url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/group_month_ps.csv'
       mds = pd.read_csv(open_url(url))
       
-
+      table_des = pn.pane.Markdown("""
+      This is the dataset
+      """).servable(target='table_des')
       def get_bar(df):
           selection = alt.selection_multi(fields=['PS'], bind='legend')
           return(
             alt.Chart(df)
-                     .mark_bar()
-                     .encode(
-                        y='Value',
-                        x='tgl',
-                        color='PS',
-                        opacity=alt.condition(selection, alt.value(1), alt.value(0))
-          ).properties(
-              height=200, width=300
-          ).add_selection(
+            .mark_bar()
+            .encode(
+              y='Value',
+              color=alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+              x='tgl',
+              opacity=alt.condition(selection, alt.value(1), alt.value(0)),
+              tooltip=[alt.Tooltip('Value',format=",.2f"), 'PS']
+            )
+            .properties(
+              height=400, width=500
+            )
+            .add_selection(
               selection
+            )
           )
-          )
-
+      
       bar = pn.pane.Vega().servable(target='bar-plot')
-    
-      def update_table(event=None):
-          table.value = get_clusters(n_clusters.value)
-
-      n_clusters.param.watch(update_table, 'value')
-
-      @pn.depends(x, y, n_clusters, watch=True)
-      def update_chart(*events):
-          chart.object = get_chart(x.value, y.value, table.value)
-          chart.selection.param.watch(update_filters, 'brush')
-
-      def update_filters(event=None):
-          filters = []
-          for k, v in (getattr(event, 'new') or {}).items():
-              filters.append(dict(field=k, type='>=', value=v[0]))
-              filters.append(dict(field=k, type='<=', value=v[1]))
-          table.filters = filters
-
-      bar.object = get_bar(mds)
-      update_table()
-      update_chart()
+      table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
+      table.value=mds
+      bar.object=get_bar(mds)
+      
     </py-script>
 
     <script>
