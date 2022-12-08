@@ -84,6 +84,7 @@
     <h5 class="w3-text-teal">Select The Variable "X" and "Y":</h5>
 	  <ul class="nav flex-column">
             <div class="bk-root" id="x-widget"></div>
+            <div class="bk-root" id="button-widget"></div>
             <div class="bk-root" id="y-widget"></div>
             <h5 class="w3-text-teal">Select Number of Clusters:</h5>
             <div class="bk-root" id="n-widget"></div>
@@ -203,6 +204,7 @@
       <h2>Clustering on Text Documents</h2>
     </header>
 	  <div class="bk-root" style="margin-top:10px" id="cluster-plot" ></div>
+  
 
     <div class="w3-padding w3-display-container w3-white">
       <p >As the value appears on the bottom left-hand-side, it means that particular keywords are difficult to find within the Article’s 
@@ -219,7 +221,8 @@
       <h2>Analysis of Clustering by using Bar Chart</h2>
     </header>
 	  <div class="bk-root" style="margin-top:10px" id="bar-plot"></div>
-    
+    <div class="bk-root" style="margin-top:10px" id="line-plot"></div>
+  
     <div class="w3-padding w3-display-container w3-white">
       <p> Note: The number above the "Section" refer to the Number of Cluster</p>
       <p >This bar graph represents the Average Keywords for each Articles Section depending on the number of K Means Cluster. </p>
@@ -240,6 +243,7 @@
       import panel as pn
       import pandas as pd
       import sklearn.cluster as KMeans
+      pn.extension()
 
       from sklearn.cluster import KMeans
       from pyodide.http import open_url
@@ -248,21 +252,31 @@
       pn.config.sizing_mode = 'stretch_width'
 
       url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/group_month_ps.csv'
-      mds = pd.read_csv(open_url(url))
+      Ax_set = pd.read_csv(open_url(url))
+
+      button = pn.widgets.Button(name='Most Sales', button_type='primary').servable(target='button-widget')
+      bar = pn.pane.Vega().servable(target='bar-plot')
+      table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
+      line = pn.pane.Vega().servable(target='line-plot')
       
       table_des = pn.pane.Markdown("""
       This is the dataset
       """).servable(target='table_des')
-      def get_bar(df):
-          selection = alt.selection_multi(fields=['PS'], bind='legend')
+      selection = alt.selection_multi(fields=['PS'], bind='legend')
+      
+      def get_bar_value(df):
+        Ax_copy = df.copy()
+        Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
+        Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
+        Ax_set_m = Ax_set_m.reset_index()     
+        Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
           return(
-            alt.Chart(df)
+            alt.Chart(Ax_set_m)
             .mark_bar()
             .encode(
               y='Value',
-              color=alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+              color= alt.Color('PS', legend=alt.Legend(symbolLimit=90),sort='-y'),
               x='tgl',
-              opacity=alt.condition(selection, alt.value(1), alt.value(0)),
               tooltip=[alt.Tooltip('Value',format=",.2f"), 'PS']
             )
             .properties(
@@ -271,12 +285,15 @@
             .add_selection(
               selection
             )
+            .transform_filter(
+              selection
+            )
           )
-      
-      bar = pn.pane.Vega().servable(target='bar-plot')
-      table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
+
+      bar.object = get_bar_value(Ax_set)
       table.value=mds
-      bar.object=get_bar(mds)
+      
+
       
     </py-script>
 
