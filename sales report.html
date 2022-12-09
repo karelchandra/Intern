@@ -131,13 +131,6 @@
       <header style="font-size:30px; margin-top:25px;" class="w3-container w3-blue-grey w3-padding-small">
         <h2>Introduction</h2>
       </header>
-	  <p style="margin-top:10px"> Users tend to prefer articles which are easier to find the information they are looking 
-      for. However, not all articles display their information in an easy to locate places. Some articles place their information in 
-      strategic places such as abstract, keywords, or introduction. <br>
-      This project intends to cluster text documents 
-      and analyze their similarities/characteristics based on the placement of texts (eg: title words) within the 
-      articles. This in case the "X" symbol is the cluster's centroid, which represents the mean of the clusters.</p>
-  
 
     <div class="w3-padding-32 w3-center">
       <button class="w3-btn w3-dark-grey w3-hover-light-grey" onclick="document.getElementById('id02').style.display='block'" style="font-weight:600;">Our Learning Objectives</button>
@@ -203,30 +196,18 @@
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small">
       <h2>Clustering on Text Documents</h2>
     </header>
-	  <div class="bk-root" style="margin-top:10px" id="cluster-plot" ></div>
+	  <div class="bk-root" style="margin-top:10px" id="bar-plot2"></div>
   
 
     <div class="w3-padding w3-display-container w3-white">
-      <p >As the value appears on the bottom left-hand-side, it means that particular keywords are difficult to find within the Article’s 
-        section, which are Abstract, Introduction, Method, Experiments, Results, and Conclusion. </p>
-      <p> On the other side, as the value appears on the upper right-hand-side, it means particular keywords are easy to find within 
-        a particular article’s section. </p> 
-        <p>
-          Hence, when its findability is difficult, the article tends to be not relevant to the keyword that user usually search for query. On the hand, when findability of the keywords within the 
-          articles is relatively easy, this means the articles is relevant for the users. 
-        </p><br>
     </div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small">
-      <h2>Analysis of Clustering by using Bar Chart</h2>
+      <h2>Analysis of Values per Month Using Bar Chart</h2>
     </header>
-	  <div class="bk-root" style="margin-top:10px" id="bar-plot"></div>
-    <div class="bk-root" style="margin-top:10px" id="line-plot"></div>
+	  <div class="bk-root" style="margin-top:10px" id="bar-plot1"></div>
   
     <div class="w3-padding w3-display-container w3-white">
-      <p> Note: The number above the "Section" refer to the Number of Cluster</p>
-      <p >This bar graph represents the Average Keywords for each Articles Section depending on the number of K Means Cluster. </p>
-      <p> This bar graph interprets that the higher the value of the Average Keywords, the easier the keywords could be find within the article for each of the Article's sections. </p> <br>
     </div>
     
     <div class="w3-container w3-blue-grey w3-padding-small" style="font-size:30px" id="table_des"></div>
@@ -243,7 +224,7 @@
       import panel as pn
       import pandas as pd
       import sklearn.cluster as KMeans
-      pn.extension()
+      pn.extension('vega')
 
       from sklearn.cluster import KMeans
       from pyodide.http import open_url
@@ -251,13 +232,13 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
 
-      url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/group_month_ps.csv'
-      Ax_set = pd.read_csv(open_url(url))
+      url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-SET.csv'
+      Ax_set = pd.read_csv(open_url(url), sep=";")
 
       button = pn.widgets.Button(name='Most Sales', button_type='primary').servable(target='button-widget')
-      bar = pn.pane.Vega().servable(target='bar-plot')
+      bar_v = pn.pane.Vega().servable(target='bar-plot1')
       table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
-      line = pn.pane.Vega().servable(target='line-plot')
+      bar_sp = pn.pane.Vega().servable(target='bar-plot2')
       
       table_des = pn.pane.Markdown("""
       This is the dataset
@@ -265,11 +246,11 @@
       selection = alt.selection_multi(fields=['PS'], bind='legend')
       
       def get_bar_value(df):
-        Ax_copy = df.copy()
-        Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
-        Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
-        Ax_set_m = Ax_set_m.reset_index()     
-        Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          Ax_copy = df.copy()
+          Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
+          Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
+          Ax_set_m = Ax_set_m.reset_index()     
+          Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
           return(
             alt.Chart(Ax_set_m)
             .mark_bar()
@@ -289,9 +270,38 @@
               selection
             )
           )
+      
+      def get_bar_sph(df):
+          Ax_copy = df.copy()
+          Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
+          Ax_copy.rename(columns = {'No.SPH':'No_SPH'}, inplace = True)
+          Ax_set_sph = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['No_SPH'].count()
+          Ax_set_sph = Ax_set_sph.reset_index()  
+          Ax_set_sph['tgl'] = Ax_set_sph['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          Ax_set_sph['No_SPH']=Ax_set_sph['No_SPH'].astype(int)
+          return(
+            alt.Chart(Ax_set_sph)
+            .mark_bar()
+            .encode(
+              y='No_SPH',
+              color= alt.Color('PS', legend=alt.Legend(symbolLimit=90),sort='-y'),
+              x='tgl',
+              tooltip=['No_SPH', 'PS']
+            )
+            .properties(
+              height=400, width=500
+            )
+            .add_selection(
+              selection
+            )
+            .transform_filter(
+              selection
+            )
+          )
 
-      bar.object = get_bar_value(Ax_set)
-      table.value=mds
+      bar_sp.object = get_bar_sph(Ax_set)
+      bar_v.object = get_bar_value(Ax_set)
+      table.value=Ax_set
       
 
       
