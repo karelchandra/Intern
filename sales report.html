@@ -96,6 +96,10 @@
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
 	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot1"></div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuecus_des">
+    </header>
+	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot3"></div>
   
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header><div class="bk-root" style="margin-top:10px" id="table"></div>
@@ -126,12 +130,14 @@
       bar_v = pn.pane.Vega().servable(target='bar-plot1')
       table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
       bar_sp = pn.pane.Vega().servable(target='bar-plot2')
+      bar_vc = pn.pane.Vega().servable(target='bar-plot3')
 
       title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2021-2022 Data""").servable(target='subtitle')
       sph_des = pn.pane.Markdown("""Analysis of No.SPH made per Month""").servable(target='sph_des')
       value_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='value_des')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
+      valuecus_des = pn.pane.Markdown("""Analysis of Customer""").servable(target='valuecus_des')
       
       selection = alt.selection_multi(fields=['PS'], bind='legend')
       
@@ -177,6 +183,33 @@
               color= alt.Color('PS', legend=alt.Legend(symbolLimit=90),sort='-y'),
               x='tgl',
               tooltip=['No_SPH', 'PS']
+            )
+            .properties(
+              height=600, width=500
+            )
+            .add_selection(
+              selection
+            )
+            .transform_filter(
+              selection
+            )
+          )
+      
+      def get_bar_valuecus(df):
+          Ax_copy = df.copy()
+          Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
+          Ax_copy.rename(columns = {'RS/Customer':'RS_Customer'}, inplace = True)
+          Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['RS_Customer']])['Value'].sum()
+          Ax_set_m = Ax_set_m.reset_index()     
+          Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          return(
+            alt.Chart(Ax_set_m)
+            .mark_bar()
+            .encode(
+              y='Value',
+              color= alt.Color('RS_Customer', legend=alt.Legend(symbolLimit=90),sort='-y'),
+              x='tgl',
+              tooltip=[alt.Tooltip('Value',format=",.2f"),'RS_Customer']
             )
             .properties(
               height=600, width=500
