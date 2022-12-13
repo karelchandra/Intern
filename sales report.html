@@ -35,14 +35,22 @@
 
     <style>
       #sidebar {
-	  width: 350px;
+        width: 350px;
       }
       .w3-sidebar {
-    z-index: 3;
-    width: 250px;
-    top: 43px;
-    bottom: 0;
-    height: inherit; }
+        z-index: 3;
+        width: 250px;
+        top: 43px;
+        bottom: 0;
+        height: inherit; 
+      }
+      .box div {
+        width: 100px;
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+      }
+
 
     </style>
 
@@ -85,19 +93,28 @@
     <h1 class="w3-xxlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="subtitle"></h1>
   </div>
 
+    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ax_des"></h3>
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sph_des'>
     </header>
-	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot2"></div>
-  
-
-    <div class="w3-padding w3-display-container w3-white">
+	  <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot2"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot4"></div>
     </div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
-	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot1"></div>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot1"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot3"></div>
+    </div>
+	  
+    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_des"></h3>
+    
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sphc_des'>
+    </header>
+	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot4"></div>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuecus_des">
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuecom_des">
     </header>
 	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot3"></div>
   
@@ -123,49 +140,28 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
 
-      url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-SET.csv'
-      Ax_set = pd.read_csv(open_url(url), sep=";")
+      df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-SET.csv'), sep=";")
+      df1.name = 'Ax_set'
+      df2 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-ITEM.csv'), sep=";")
+      df2.name = 'Ax_item'
 
       button = pn.widgets.Button(name='Most Sales', button_type='primary').servable(target='button-widget')
-      bar_v = pn.pane.Vega().servable(target='bar-plot1')
+      bar_vs = pn.pane.Vega().servable(target='bar-plot1')
       table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
-      bar_sp = pn.pane.Vega().servable(target='bar-plot2')
-      bar_vc = pn.pane.Vega().servable(target='bar-plot3')
+      bar_sps = pn.pane.Vega().servable(target='bar-plot2')
+      bar_vi = pn.pane.Vega().servable(target='bar-plot3')
+      bar_spi = pn.pane.Vega().servable(target='bar-plot4')
 
       title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2021-2022 Data""").servable(target='subtitle')
       sph_des = pn.pane.Markdown("""Analysis of No.SPH made per Month""").servable(target='sph_des')
       value_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='value_des')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
-      valuecus_des = pn.pane.Markdown("""Analysis of Customer""").servable(target='valuecus_des')
+      Ax_des = pn.pane.Markdown("""Axelia""").servable(target='Ax_des')
+      Al_des = pn.pane.Markdown("""Allied""").servable(target='Al_des')
       
-      selection = alt.selection_multi(fields=['PS'], bind='legend')
-      
-      def get_bar_value(df):
-          Ax_copy = df.copy()
-          Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
-          Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
-          Ax_set_m = Ax_set_m.reset_index()     
-          Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
-          return(
-            alt.Chart(Ax_set_m)
-            .mark_bar()
-            .encode(
-              y='Value',
-              color= alt.Color('PS', legend=alt.Legend(symbolLimit=90),sort='-y'),
-              x='tgl',
-              tooltip=[alt.Tooltip('Value',format=",.2f"), 'PS']
-            )
-            .properties(
-              height=600, width=500
-            )
-            .add_selection(
-              selection
-            )
-            .transform_filter(
-              selection
-            )
-          )
+      selection = alt.selection_single(fields=['PS'], bind='legend')
+      selector = alt.selection_single(fields=['PS'])
       
       def get_bar_sph(df):
           Ax_copy = df.copy()
@@ -174,57 +170,116 @@
           Ax_set_sph = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['No_SPH'].count()
           Ax_set_sph = Ax_set_sph.reset_index()  
           Ax_set_sph['tgl'] = Ax_set_sph['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
-          Ax_set_sph['No_SPH']=Ax_set_sph['No_SPH'].astype(int)
-          return(
-            alt.Chart(Ax_set_sph)
-            .mark_bar()
-            .encode(
-              y='No_SPH',
-              color= alt.Color('PS', legend=alt.Legend(symbolLimit=90),sort='-y'),
-              x='tgl',
-              tooltip=['No_SPH', 'PS']
+          if df.name == "Ax_set":
+            return(
+              alt.Chart(Ax_set_sph)
+              .mark_bar()
+              .encode(
+                y='No_SPH',
+                color= alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+                x='tgl',
+                tooltip=['No_SPH', 'PS'],
+                order = alt.Order(
+                  'No_SPH',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Set Chart"
+              )
+              .add_selection(
+                selection,
+                selector
+              )
+              .transform_filter(
+                selection&selector
+              )
             )
-            .properties(
-              height=600, width=500
+          else:
+            return(
+              alt.Chart(Ax_set_sph)
+              .mark_bar()
+              .encode(
+                y='No_SPH',
+                color= alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+                x='tgl',
+                tooltip=['No_SPH', 'PS'],
+                order = alt.Order(
+                  'No_SPH',
+                  sort = 'ascending'
+                )
+              ) 
+              .properties(
+                height=600, width=500, title="Item Chart"
+              )
+              .add_selection(
+                selection,selector
+              )
+              .transform_filter(
+                selection&selector
+              )
             )
-            .add_selection(
-              selection
-            )
-            .transform_filter(
-              selection
-            )
-          )
       
-      def get_bar_valuecus(df):
+      def get_bar_value(df):
           Ax_copy = df.copy()
           Ax_copy['tgl'] = pd.to_datetime(Ax_copy['tgl'])
-          Ax_copy.rename(columns = {'RS/Customer':'RS_Customer'}, inplace = True)
-          Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['RS_Customer']])['Value'].sum()
+          Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
           Ax_set_m = Ax_set_m.reset_index()     
           Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
-          return(
-            alt.Chart(Ax_set_m)
-            .mark_bar()
-            .encode(
-              y='Value',
-              color= alt.Color('RS_Customer', legend=alt.Legend(symbolLimit=90),sort='-y'),
-              x='tgl',
-              tooltip=[alt.Tooltip('Value',format=",.2f"),'RS_Customer']
+          if df.name == "Ax_set":
+            return(
+              alt.Chart(Ax_set_m)
+              .mark_bar()
+              .encode(
+                y='Value',
+                color= alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+                x='tgl',
+                tooltip=[alt.Tooltip('Value',format=",.2f"), 'PS'],
+                order = alt.Order(
+                  'Value',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Set Chart"
+              )
+              .add_selection(
+                selection, selector
+              )
+              .transform_filter(
+                selection&selector
+              )
             )
-            .properties(
-              height=600, width=500
+          else:
+            return(
+              alt.Chart(Ax_set_m)
+              .mark_bar()
+              .encode(
+                y='Value',
+                color= alt.Color('PS', legend=alt.Legend(symbolLimit=90)),
+                x='tgl',
+                tooltip=[alt.Tooltip('Value',format=",.2f"), 'PS'],
+                order = alt.Order(
+                  'Value',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Item Chart"
+              )
+              .add_selection(
+                selection, selector
+              )
+              .transform_filter(
+                selection&selector
+              )
             )
-            .add_selection(
-              selection
-            )
-            .transform_filter(
-              selection
-            )
-          )
 
-      bar_sp.object = get_bar_sph(Ax_set)
-      bar_v.object = get_bar_value(Ax_set)
-      table.value=Ax_set
+      bar_sps.object = get_bar_sph(df1)
+      bar_spi.object = get_bar_sph(df2)
+      bar_vs.object = get_bar_value(df1)
+      bar_vi.object = get_bar_value(df2)
+      table.value=df1
       
 
       
