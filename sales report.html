@@ -109,17 +109,31 @@
     </div>
 	  
     <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_des"></h3>
-    
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sphc_des'>
-    </header>
-	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot4"></div>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuecom_des">
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'spha_des'>
     </header>
-	  <div class="bk-root" style="margin-top:10px; text-align: center" id="bar-plot3"></div>
-  
+	  <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot6"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot8"></div>
+    </div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuea_des">
+    </header>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot5"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot7"></div>
+    </div>
+
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
-    </header><div class="bk-root" style="margin-top:10px" id="table"></div>
+    </header>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AxS_data"></h3>
+    <div class="bk-root" id="Axs_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AxI_data"></h3>
+    <div class="bk-root" id="Axi_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlS_data"></h3>
+    <div class="bk-root" id="Als_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlI_data"></h3>
+    <div class="bk-root" id="Ali_table"></div>
 	</div>
       </div>
     </div>
@@ -141,24 +155,41 @@
       pn.config.sizing_mode = 'stretch_width'
 
       df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-SET.csv'), sep=";")
-      df1.name = 'Ax_set'
+      df1.name = 'set'
       df2 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022AXELIA-ITEM.csv'), sep=";")
-      df2.name = 'Ax_item'
-
+      df2.name = 'item'
+      df3 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022ALLIED-SET.csv'), sep=";")
+      df3.name = 'set'
+      df4 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/sales2021-2022ALLIED-ITEM.csv'), sep=";")
+      df4.name = 'item'
+      
       button = pn.widgets.Button(name='Most Sales', button_type='primary').servable(target='button-widget')
+      Axs_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Axs_table')
+      Axi_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Axi_table')
+      Als_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Als_table')
+      Ali_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Ali_table')
       bar_vs = pn.pane.Vega().servable(target='bar-plot1')
-      table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='table')
       bar_sps = pn.pane.Vega().servable(target='bar-plot2')
       bar_vi = pn.pane.Vega().servable(target='bar-plot3')
       bar_spi = pn.pane.Vega().servable(target='bar-plot4')
+      bar_vsal = pn.pane.Vega().servable(target='bar-plot5')
+      bar_spsal = pn.pane.Vega().servable(target='bar-plot6')
+      bar_vial = pn.pane.Vega().servable(target='bar-plot7')
+      bar_spial = pn.pane.Vega().servable(target='bar-plot8')
 
       title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
-      subtitle = pn.pane.Markdown("""2021-2022 Data""").servable(target='subtitle')
+      subtitle = pn.pane.Markdown("""2021-2022""").servable(target='subtitle')
       sph_des = pn.pane.Markdown("""Analysis of No.SPH made per Month""").servable(target='sph_des')
       value_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='value_des')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
       Ax_des = pn.pane.Markdown("""Axelia""").servable(target='Ax_des')
       Al_des = pn.pane.Markdown("""Allied""").servable(target='Al_des')
+      spha_des = pn.pane.Markdown("""Analysis of No.SPH made per Month""").servable(target='spha_des')
+      valuea_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='valuea_des')
+      AxS_data = pn.pane.Markdown("""Axelia-SET Dataset""").servable(target='AxS_data')
+      AxI_data = pn.pane.Markdown("""Axelia-ITEM Dataset""").servable(target='AxI_data')
+      AlS_data = pn.pane.Markdown("""Allied-SET Dataset""").servable(target='AlS_data')
+      AlI_data = pn.pane.Markdown("""Allied-ITEM Dataset""").servable(target='AlI_data')
       
       selection = alt.selection_single(fields=['PS'], bind='legend')
       selector = alt.selection_single(fields=['PS'])
@@ -170,7 +201,7 @@
           Ax_set_sph = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['No_SPH'].count()
           Ax_set_sph = Ax_set_sph.reset_index()  
           Ax_set_sph['tgl'] = Ax_set_sph['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
-          if df.name == "Ax_set":
+          if df.name == "set":
             return(
               alt.Chart(Ax_set_sph)
               .mark_bar()
@@ -226,7 +257,7 @@
           Ax_set_m = Ax_copy.groupby([Ax_copy['tgl'].dt.to_period('M'), Ax_copy['PS']])['Value'].sum()
           Ax_set_m = Ax_set_m.reset_index()     
           Ax_set_m['tgl'] = Ax_set_m['tgl'].dt.to_timestamp('s').dt.strftime('%Y-%m')
-          if df.name == "Ax_set":
+          if df.name == "set":
             return(
               alt.Chart(Ax_set_m)
               .mark_bar()
@@ -279,8 +310,14 @@
       bar_spi.object = get_bar_sph(df2)
       bar_vs.object = get_bar_value(df1)
       bar_vi.object = get_bar_value(df2)
-      table.value=df1
-      
+      bar_spsal.object = get_bar_sph(df3)
+      bar_spial.object = get_bar_sph(df4)
+      bar_vsal.object = get_bar_value(df3)
+      bar_vial.object = get_bar_value(df4)
+      Axs_table.value=df1
+      Axi_table.value=df2
+      Als_table.value=df3
+      Ali_table.value=df4
 
       
     </py-script>
