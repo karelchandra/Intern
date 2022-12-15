@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#000000">
+    <meta name="name" content="PyScript/Panel KMeans Demo">
+
+    <title>Sales Report 2021-2020</title>
+    <!-- <link rel="icon" type="image/x-icon" href="./favicon.png"> -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/css/widgets.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/css/markdown.css" type="text/css" />
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.3.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.3.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.3.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@holoviz/panel@0.13.1/dist/panel.min.js"></script>
+    <script type="text/javascript">
+      Bokeh.set_log_level("info");
+    </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/bundled/bootstraptemplate/bootstrap.css">
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/bundled/defaulttheme/default.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+      #sidebar {
+        width: 350px;
+      }
+      .w3-sidebar {
+        z-index: 3;
+        width: 250px;
+        top: 43px;
+        bottom: 0;
+        height: inherit; 
+      }
+      .box div {
+        width: 100px;
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+      }
+
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  </head>
+
+  <py-config>
+    packages = [
+      "altair",
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "panel==0.13.1",
+      "matplotlib"
+    ]
+  </py-config>
+
+  <body>
+
+    <div class="container-fluid d-flex flex-column vh-100 overflow-hidden" id="container">
+      <!-- Side Navigation and Header -->
+      <nav class="navbar navbar-expand-md navbar-dark sticky-top shadow w3-blue-grey" id="header">
+	
+	<div class="app-header">
+	  <a class="w3-xlarge navbar-brand app-logo" href="/">
+	    <img src="Pro_health.png" class="app-logo" width = "100" height = "3000">
+	  </a>
+	  <a class="title" href="" style="color: #efebe3;">Report Analysis</a>
+      </div>
+      </nav>
+  
+
+	<div class="col mh-100 float-left w3-display-container" id="main">
+
+    <!-- Header -->
+  <div class="w3-container-padding-small" style="margin-top:15px" id="showcase">
+    <h2 class="w3-xxxlarge" style = "font-weight: bold" id="title"></h2>
+    <h1 class="w3-xxlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="subtitle"></h1>
+  </div>
+
+    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ax_des"></h3>
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sph_des'>
+    </header>
+	  <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot2"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot4"></div>
+    </div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
+    </header>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot1"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot3"></div>
+    </div>
+	  
+    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_des"></h3>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'spha_des'>
+    </header>
+	  <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot6"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot8"></div>
+    </div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuea_des">
+    </header>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot5"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot7"></div>
+    </div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
+    </header>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Main_data"></h3>
+    <div class="bk-root" id="Main_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AxI_data"></h3>
+    <div class="bk-root" id="Axi_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlS_data"></h3>
+    <div class="bk-root" id="Als_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlI_data"></h3>
+    <div class="bk-root" id="Ali_table"></div>
+	</div>
+      </div>
+    </div>
+
+    
+
+    <py-script>
+      import warnings
+      import altair as alt
+      import panel as pn
+      import pandas as pd
+      
+      pn.extension('vega')
+
+      from pyodide.http import open_url
+
+      warnings.simplefilter(action='ignore', category=FutureWarning)
+      pn.config.sizing_mode = 'stretch_width'
+
+      df1 = pd.read_csv(open_url('https://app.pro-healthint.info/rawdata/cbv2022.csv'), sep=";")
+
+      Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
+
+      title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
+      subtitle = pn.pane.Markdown("""2021-2022""").servable(target='subtitle')
+      table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
+      Main_data = pn.pane.Markdown("""Main Dataset""").servable(target='Main_data')
+
+      Main_table.value = df1
+     
+      
+    </py-script>
+
+  </body>
+  
+</html>

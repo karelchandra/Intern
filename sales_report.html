@@ -5,7 +5,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="theme-color" content="#000000">
-    <meta name="name" content="PyScript/Panel KMeans Demo">
+    <meta name="name" content="Sales Report">
 
     <title>Sales Report 2021-2020</title>
     <!-- <link rel="icon" type="image/x-icon" href="./favicon.png"> -->
@@ -33,43 +33,22 @@
     <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-    <style>
-      #sidebar {
-        width: 350px;
-      }
-      .w3-sidebar {
-        z-index: 3;
-        width: 250px;
-        top: 43px;
-        bottom: 0;
-        height: inherit; 
-      }
-      .box div {
-        width: 100px;
-        display: inline-block;
-        padding: 1rem 1rem;
-        vertical-align: middle;
-      }
-
-
-    </style>
-
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
 
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
   </head>
-
-  <py-env>
-    - altair
-    - numpy
-    - pandas
-    - scikit-learn
-    - panel==0.13.1
-    - matplotlib
-  </py-env>
-
+  <py-config>
+    packages = [
+      "altair",
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "panel==0.13.1",
+      "matplotlib"
+    ]
+  </py-config>
   <body>
 
     <div class="container-fluid d-flex flex-column vh-100 overflow-hidden" id="container">
@@ -145,10 +124,8 @@
       import altair as alt
       import panel as pn
       import pandas as pd
-      import sklearn.cluster as KMeans
       pn.extension('vega')
 
-      from sklearn.cluster import KMeans
       from pyodide.http import open_url
 
       warnings.simplefilter(action='ignore', category=FutureWarning)
