@@ -154,7 +154,7 @@
 
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
-
+  
       df1 = pd.read_csv(open_url('https://app.pro-healthint.info/rawdata/cbv2022.csv'), sep=";")
 
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
