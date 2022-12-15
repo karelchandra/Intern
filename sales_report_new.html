@@ -99,43 +99,46 @@
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sph_des'>
     </header>
 	  <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot2"></div>
-      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot4"></div>
+      
     </div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
-    <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot1"></div>
-      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot3"></div>
-    </div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
+  
 	  
     <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_des"></h3>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'spha_des'>
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'cus_des'>
     </header>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot6"></div>
+
 	  <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot6"></div>
       <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot8"></div>
     </div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuea_des">
     </header>
     <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 2%;" id="bar-plot5"></div>
-      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot7"></div>
     </div>
+
+    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ae_des"></h3>
+    
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
     <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Main_data"></h3>
     <div class="bk-root" id="Main_table"></div>
-    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AxI_data"></h3>
-    <div class="bk-root" id="Axi_table"></div>
-    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlS_data"></h3>
-    <div class="bk-root" id="Als_table"></div>
-    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="AlI_data"></h3>
-    <div class="bk-root" id="Ali_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ax_data"></h3>
+    <div class="bk-root" id="Ax_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_data"></h3>
+    <div class="bk-root" id="Al_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ae_data"></h3>
+    <div class="bk-root" id="Ae_table"></div>
 	</div>
       </div>
     </div>
@@ -155,16 +158,212 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
   
-      df1 = pd.read_csv(open_url('https://app.pro-healthint.info/rawdata/cbv2022.csv'), sep=";")
+      df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/cbv2022.csv'), sep=";")
+      Ax = df1[df1.divisi == 'AXELIA']
+      Ax.name = 'AXELIA'
+      Al = df1[df1.divisi == 'ALLIED']
+      Al.name = 'ALLIED'
+      Ae = df1[df1.divisi == 'AEGLE']
+      Ae.name = 'AEGLE'
 
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
+      Ax_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Ax_table')
+      Al_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Al_table')
+      Ae_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Ae_table')
+      
+      bar_vax = pn.pane.Vega().servable(target='bar-plot1')
+      bar_val = pn.pane.Vega().servable(target='bar-plot2')
+      bar_vae = pn.pane.Vega().servable(target='bar-plot3')
+      
+      bar_vaxcs = pn.pane.Vega().servable(target='bar-plot4')
+      bar_valcs = pn.pane.Vega().servable(target='bar-plot5')
+      bar_vaecs = pn.pane.Vega().servable(target='bar-plot6')
 
       title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2021-2022""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
+      
       Main_data = pn.pane.Markdown("""Main Dataset""").servable(target='Main_data')
+      value_des = pn.pane.Markdown("""Analysis of Successful Transactions by sales per Month""").servable(target='value_des')
+      customer_des = pn.pane.Markdown("""Analysis of Successful Transactions to each customer per Month""").servable(target='cus_des')
+      
+      Ax_data = pn.pane.Markdown("""Axelia Dataset""").servable(target='Ax_data')
+      Al_data = pn.pane.Markdown("""Allied Dataset""").servable(target='Al_data')
+      Ae_data = pn.pane.Markdown("""Aegle Dataset""").servable(target='Ae_data')
 
+      selection = alt.selection_single(fields=['namaPS'], bind='legend')
+      selector = alt.selection_single(fields=['namaPS'])
+
+      selection_c = alt.selection_single(fields=['nama_customer'], bind='legend')
+      selector_c = alt.selection_single(fields=['nama_customer'])
+
+      def get_bar_value(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['bulan'], A_copy['namaPS']])['nilai'].sum()
+          A_m = A_m.reset_index()     
+          if df.name == "AXELIA":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('namaPS', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Axelia Chart"
+              )
+              .add_selection(
+                selection, selector
+              )
+              .transform_filter(
+                selection&selector
+              )
+            )
+          elif df.name == "ALLIED":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('namaPS', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Allied Chart"
+              )
+              .add_selection(
+                selection, selector
+              )
+              .transform_filter(
+                selection&selector
+              )
+            )
+          else:
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('namaPS', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Aegle Chart"
+              )
+              .add_selection(
+                selection, selector
+              )
+              .transform_filter(
+                selection&selector
+              )
+            )
+
+      def get_bar_cus(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['bulan'], A_copy['namaPS'], A_copy['nama_customer']])['nilai'].sum()
+          A_m = A_m.reset_index()     
+          if df.name == "AXELIA":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Axelia Chart"
+              )
+              .add_selection(
+                selection_c, selector_c
+              )
+              .transform_filter(
+                selection_c&selector_c
+              )
+            )
+          elif df.name == "ALLIED":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Allied Chart"
+              )
+              .add_selection(
+                selection_c, selector_c
+              )
+              .transform_filter(
+                selection_c&selector_c
+              )
+            )
+          else:
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Aegle Chart"
+              )
+              .add_selection(
+                selection_c, selector_c
+              )
+              .transform_filter(
+                selection_c&selector_c
+              )
+            )
       Main_table.value = df1
+      Ax_table.value = Ax
+      Al_table.value = Al
+      Ae_table.value = Ae
+
+      bar_vax.object = get_bar_value(Ax)
+      bar_val.object = get_bar_value(Al)
+      bar_vae.object = get_bar_value(Ae)
+
+      bar_vaxcs.object = get_bar_cus(Ax)
+      bar_valcs.object = get_bar_cus(Al)
+      bar_vaecs.object = get_bar_cus(Ae)
+
+     
      
       
     </py-script>
