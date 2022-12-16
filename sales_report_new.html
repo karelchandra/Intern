@@ -95,39 +95,26 @@
     <h1 class="w3-xxlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="subtitle"></h1>
   </div>
 
-    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ax_des"></h3>
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'sph_des'>
-    </header>
-	  <div class = "box">
-      
-    </div>
-
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
   
-	  
-    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Al_des"></h3>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id = 'cus_des'>
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot6"></div>
 
-	  <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot8"></div>
-    </div>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="valuea_des">
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="region_des">
     </header>
-    <div class = "box">
-    </div>
-
-    <h3 class="w3-xlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="Ae_des"></h3>
-    
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot7"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot8"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot9"></div>
+	  
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
@@ -159,6 +146,8 @@
       pn.config.sizing_mode = 'stretch_width'
   
       df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/cbv2022.csv'), sep=";")
+      df1['region'] = df1['region'].str.strip()
+      df1['region'] = df1['region'].replace(['YOGYAKARYA'],'YOGYAKARTA')
       Ax = df1[df1.divisi == 'AXELIA']
       Ax.name = 'AXELIA'
       Al = df1[df1.divisi == 'ALLIED']
@@ -179,13 +168,19 @@
       bar_valcs = pn.pane.Vega().servable(target='bar-plot5')
       bar_vaecs = pn.pane.Vega().servable(target='bar-plot6')
 
-      title = pn.pane.Markdown("""Annual Sales Report""").servable(target='title')
-      subtitle = pn.pane.Markdown("""2021-2022""").servable(target='subtitle')
+      bar_regax = pn.pane.Vega().servable(target='bar-plot7')
+      bar_regal = pn.pane.Vega().servable(target='bar-plot8')
+      bar_regae = pn.pane.Vega().servable(target='bar-plot9')
+
+
+      title = pn.pane.Markdown("""Annual Sales CBV Report""").servable(target='title')
+      subtitle = pn.pane.Markdown("""2022""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
       
       Main_data = pn.pane.Markdown("""Main Dataset""").servable(target='Main_data')
       value_des = pn.pane.Markdown("""Analysis of Successful Transactions by sales per Month""").servable(target='value_des')
-      customer_des = pn.pane.Markdown("""Analysis of Successful Transactions to each customer per Month""").servable(target='cus_des')
+      customer_des = pn.pane.Markdown("""Analysis of Transactions by Customer per Month""").servable(target='cus_des')
+      region_des = pn.pane.Markdown("""Analysis of Transactions by Region per Month""").servable(target='region_des')
       
       Ax_data = pn.pane.Markdown("""Axelia Dataset""").servable(target='Ax_data')
       Al_data = pn.pane.Markdown("""Allied Dataset""").servable(target='Al_data')
@@ -196,6 +191,9 @@
 
       selection_c = alt.selection_single(fields=['nama_customer'], bind='legend')
       selector_c = alt.selection_single(fields=['nama_customer'])
+
+      selection_r = alt.selection_single(fields=['region'], bind='legend')
+      selector_r = alt.selection_single(fields=['region'])
 
       def get_bar_value(df):
           A_copy = df.copy()
@@ -278,31 +276,7 @@
           A_copy = df.copy()
           A_m = A_copy.groupby([A_copy['bulan'], A_copy['namaPS'], A_copy['nama_customer']])['nilai'].sum()
           A_m = A_m.reset_index()     
-          if df.name == "AXELIA":
-            return(
-              alt.Chart(A_m)
-              .mark_bar()
-              .encode(
-                y='nilai',
-                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
-                x='bulan',
-                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
-                order = alt.Order(
-                  'nilai',
-                  sort = 'ascending'
-                )
-              )
-              .properties(
-                height=600, width=500, title="Axelia Chart"
-              )
-              .add_selection(
-                selection_c, selector_c
-              )
-              .transform_filter(
-                selection_c&selector_c
-              )
-            )
-          elif df.name == "ALLIED":
+          if df.name == "ALLIED":
             return(
               alt.Chart(A_m)
               .mark_bar()
@@ -350,6 +324,129 @@
                 selection_c&selector_c
               )
             )
+
+      def get_cus(df):
+          A_copy = df.copy()
+          A_copys1 = A_copy[A_copy.bulan < 7]
+          A_copys2 = A_copy[A_copy.bulan > 6]
+          A_ms1 = A_copys1.groupby([A_copys1['bulan'], A_copys1['nama_customer'], A_copys1['namaPS']])['nilai'].sum()
+          A_ms1 = A_ms1.reset_index()  
+          A_ms2 = A_copys2.groupby([A_copys2['bulan'], A_copys2['nama_customer'], A_copys2['namaPS']])['nilai'].sum()
+          A_ms2 = A_ms2.reset_index() 
+          s1 = alt.Chart(A_ms1).mark_bar().encode(
+            y='nilai',
+            color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=100)),
+            x='bulan',
+            tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
+            order = alt.Order(
+              'nilai',
+              sort = 'ascending'
+              )
+            ).properties(
+              height=600, width=500, title="Axelia Chart S1"
+            ).add_selection(
+              selection_c, selector_c
+            ).transform_filter(
+              selection_c&selector_c
+            )
+          s2 = alt.Chart(A_ms2).mark_bar().encode(
+            y='nilai',
+            color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=100)),
+            x='bulan',
+            tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
+            order = alt.Order(
+              'nilai',
+              sort = 'ascending'
+              )
+            ).properties(
+              height=600, width=500, title="Axelia Chart S2"
+            ).add_selection(
+              selection_c, selector_c
+            ).transform_filter(
+              selection_c&selector_c
+            )
+
+          return(
+            s1 | s2
+          )
+
+      def get_reg(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['bulan'],A_copy['region']])['nilai'].sum()
+          A_m = A_m.reset_index()     
+          if df.name == "AXELIA":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('region',legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'region'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Axelia Chart"
+              )
+              .add_selection(
+                selection_r, selector_r
+              )
+              .transform_filter(
+                selection_r&selector_r
+              )
+            )
+          elif df.name == "ALLIED":
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('region', scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'region'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Allied Chart"
+              )
+              .add_selection(
+                selection_r, selector_r
+              )
+              .transform_filter(
+                selection_r&selector_r
+              )
+            )
+          else:
+            return(
+              alt.Chart(A_m)
+              .mark_bar()
+              .encode(
+                y='nilai',
+                color= alt.Color('region', scale=alt.Scale(scheme='tableau20')),
+                x='bulan',
+                tooltip=[alt.Tooltip('nilai',format=",.2f"), 'region'],
+                order = alt.Order(
+                  'nilai',
+                  sort = 'ascending'
+                )
+              )
+              .properties(
+                height=600, width=500, title="Aegle Chart"
+              )
+              .add_selection(
+                selection_r, selector_r
+              )
+              .transform_filter(
+                selection_r&selector_r
+              )
+            )
+
       Main_table.value = df1
       Ax_table.value = Ax
       Al_table.value = Al
@@ -359,13 +456,14 @@
       bar_val.object = get_bar_value(Al)
       bar_vae.object = get_bar_value(Ae)
 
-      bar_vaxcs.object = get_bar_cus(Ax)
+      bar_vaxcs.object = get_cus(Ax)
       bar_valcs.object = get_bar_cus(Al)
       bar_vaecs.object = get_bar_cus(Ae)
 
-     
-     
-      
+      bar_regax.object = get_reg(Ax)
+      bar_regal.object = get_reg(Al)
+      bar_regae.object = get_reg(Ae)
+
     </py-script>
 
   </body>
