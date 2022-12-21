@@ -97,24 +97,11 @@
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
   
-
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot6"></div>
-
-
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="region_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot7"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot8"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot9"></div>
-	  
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
@@ -160,11 +147,14 @@
     
       selection = alt.selection_single(fields=['Item_Type'], bind='legend')
       selector = alt.selection_single(fields=['Item_Type'])
+
+      selection_o = alt.selection_single(fields=['nama_customer'], bind='legend')
+      selector_o = alt.selection_single(fields=['nama_customer'])
     
       def get_bar_value(df):
           A_copy = df.copy()
           A_copy['Date_Faktur'] = pd.to_datetime(A_copy['Date_Faktur'])
-          A_m = A_copy.groupby([A_copy['Date_Faktur'], A_copy['Id_Orders'], A_copy['Item_Type']])['Total_Faktur'].sum()
+          A_m = A_copy.groupby([A_copy['Date_Faktur'], A_copy['Id_Orders']])['Total_Faktur'].sum()
           A_m = A_m.reset_index()   
           A_m['Date_Faktur'] = A_m['Date_Faktur'].dt.strftime('%Y-%m')
           return(
@@ -175,8 +165,29 @@
               x='Date_Faktur',
               tooltip=[alt.Tooltip('Total_Faktur',format=",.2f")]
             )
+          )
+
+      def get_bar_order(df):
+          A_copy = df.copy()
+          A_copy['Request_Date'] = pd.to_datetime(A_copy['Request_Date'])
+          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Order_By']])['Id_Orders'].count()
+          A_m = A_m.reset_index()   
+          A_m['Request_Date'] = A_m['Request_Date'].dt.strftime('%Y-%m')
+          return(
+            alt.Chart(A_m)
+            .mark_bar()
+            .encode(
+              y='Id_Orders',
+              x='Request_Date',
+              color= alt.Color('Order_By', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Order_By'],
+              order = alt.Order(
+                'Id_Orders',
+                sort = 'ascending'
+              )
+            )
             .properties(
-              height=600, width=500, title="Total Faktur Chart"
+              height=600, width=500, title="Total Order Chart"
             )
             .add_selection(
               selection, selector
@@ -184,10 +195,11 @@
             .transform_filter(
               selection&selector
             )
-          )
+          )    
 
       Main_table.value = df1   
-      bar_vax.object = get_bar_value(Faktur)
+      bar_vae.object = get_bar_value(Faktur)
+      bar_val.object = get_bar_order(Faktur)
          
     </py-script>
     
