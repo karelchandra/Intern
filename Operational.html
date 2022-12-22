@@ -111,15 +111,16 @@
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
     <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot5"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot5"></div>
       <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot6"></div>
     </div>
 
     <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot7"></div>
+      <div class="bk-root" style="margin-top:7.5%; margin-left: 3%;" id="bar-plot7"></div>
       <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot8"></div>
     </div>
     
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="cluster-plot"></div>
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
@@ -149,10 +150,12 @@
       bar_va21 = pn.pane.Vega().servable(target='bar-plot3')
       bar_va22 = pn.pane.Vega().servable(target='bar-plot4')
       
-      bar_or19 = pn.pane.Vega().servable(target='bar-plot5')
+      bar_or19 = pn.pane.Vega().servable(target='bar-plot9')
       bar_or20 = pn.pane.Vega().servable(target='bar-plot6')
       bar_or21 = pn.pane.Vega().servable(target='bar-plot7')
       bar_or22 = pn.pane.Vega().servable(target='bar-plot8')
+
+      chart = pn.pane.Vega().servable(target='cluster-plot')
 
           
       title = pn.pane.Markdown("""Operational Report""").servable(target='title')
@@ -162,8 +165,7 @@
       Main_data = pn.pane.Markdown("""Main Dataset""").servable(target='Main_data')
       value_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='value_des')
       customer_des = pn.pane.Markdown("""Analysis of Successful Orders per Month""").servable(target='cus_des')
-      region_des = pn.pane.Markdown("""Analysis of Transactions by Region per Month""").servable(target='region_des')
-
+      
 
       df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/test.csv'), sep=";")
       df1.columns = df1.columns.str.replace(' ', '_')
@@ -243,7 +245,7 @@
             .encode(
               y='Id_Orders',
               x='Request_Date',
-              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=150), scale=alt.Scale(scheme='tableau20')),
+              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=200), scale=alt.Scale(scheme='tableau20')),
               tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
               order = alt.Order(
                 'Id_Orders',
@@ -259,7 +261,30 @@
             .transform_filter(
               selection_o&selector_o
             )
-          )    
+          )
+      
+      def get_chart(df):
+          A_copy = df.copy()
+          A_copy['Request_Date'] = pd.to_datetime(A_copy['Request_Date'])
+          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Hospital_Name'], A_copy['Order_By'], A_copy['Via'], A_copy['Used']])['Id_Orders'].count()
+          A_m = A_m.reset_index()   
+          A_m['Request_Date'] = A_m['Request_Date'].dt.strftime('%Y-%m')
+          return (
+            alt.Chart(A_m)
+            .mark_circle(size=100)
+            .encode(
+              y='Id_Orders',
+              x='Used',
+              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=200), scale=alt.Scale(scheme='tableau20')),
+              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
+            )
+            .add_selection(
+              selection_o, selector_o
+            )
+            .transform_filter(
+              selection_o&selector_o
+            ) 
+          )
 
       Main_table.value = df1   
       bar_va19.object = get_bar_value(F19)
@@ -271,6 +296,8 @@
       bar_or20.object = get_bar_order(d20)
       bar_or21.object = get_bar_order(d21)
       bar_or22.object = get_bar_order(d22)
+
+      chart.object = get_chart(df1)
          
     </py-script>
     
