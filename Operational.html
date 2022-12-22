@@ -116,7 +116,7 @@
     </div>
 
     <div class = "box">
-      <div class="bk-root" style="margin-top:7.5%; margin-left: 3%;" id="bar-plot7"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot7"></div>
       <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot8"></div>
     </div>
     
@@ -149,8 +149,7 @@
       bar_va20 = pn.pane.Vega().servable(target='bar-plot2')
       bar_va21 = pn.pane.Vega().servable(target='bar-plot3')
       bar_va22 = pn.pane.Vega().servable(target='bar-plot4')
-      
-      bar_or19 = pn.pane.Vega().servable(target='bar-plot9')
+      bar_or19 = pn.pane.Vega().servable(target='bar-plot5')
       bar_or20 = pn.pane.Vega().servable(target='bar-plot6')
       bar_or21 = pn.pane.Vega().servable(target='bar-plot7')
       bar_or22 = pn.pane.Vega().servable(target='bar-plot8')
@@ -245,7 +244,7 @@
             .encode(
               y='Id_Orders',
               x='Request_Date',
-              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=200), scale=alt.Scale(scheme='tableau20')),
+              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=130), scale=alt.Scale(scheme='tableau20')),
               tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
               order = alt.Order(
                 'Id_Orders',
@@ -263,28 +262,6 @@
             )
           )
       
-      def get_chart(df):
-          A_copy = df.copy()
-          A_copy['Request_Date'] = pd.to_datetime(A_copy['Request_Date'])
-          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Hospital_Name'], A_copy['Order_By'], A_copy['Via'], A_copy['Used']])['Id_Orders'].count()
-          A_m = A_m.reset_index()   
-          A_m['Request_Date'] = A_m['Request_Date'].dt.strftime('%Y-%m')
-          return (
-            alt.Chart(A_m)
-            .mark_circle(size=100)
-            .encode(
-              y='Id_Orders',
-              x='Used',
-              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=200), scale=alt.Scale(scheme='tableau20')),
-              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
-            )
-            .add_selection(
-              selection_o, selector_o
-            )
-            .transform_filter(
-              selection_o&selector_o
-            ) 
-          )
 
       Main_table.value = df1   
       bar_va19.object = get_bar_value(F19)
@@ -297,7 +274,6 @@
       bar_or21.object = get_bar_order(d21)
       bar_or22.object = get_bar_order(d22)
 
-      chart.object = get_chart(df1)
          
     </py-script>
     
