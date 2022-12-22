@@ -97,11 +97,29 @@
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot1"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot2"></div>
+    </div>
+
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot3"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot4"></div>
+    </div>
+    
   
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot5"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot6"></div>
+    </div>
+
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot7"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot8"></div>
+    </div>
+    
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
@@ -122,39 +140,71 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
       
-      df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/test.csv'), sep=";")
-      df1.columns = df1.columns.str.replace(' ', '_')
-      df1["Date_Faktur"] = df1["Date_Faktur"].replace(['2021-11-00'],'01/11/21')
-      Faktur = df1[df1.Date_Faktur != '-']
-         
+      
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='Main_table')
           
           
-      bar_vax = pn.pane.Vega().servable(target='bar-plot1')
-      bar_val = pn.pane.Vega().servable(target='bar-plot2')
-      bar_vae = pn.pane.Vega().servable(target='bar-plot3')
-          
+      bar_va19 = pn.pane.Vega().servable(target='bar-plot1')
+      bar_va20 = pn.pane.Vega().servable(target='bar-plot2')
+      bar_va21 = pn.pane.Vega().servable(target='bar-plot3')
+      bar_va22 = pn.pane.Vega().servable(target='bar-plot4')
+      
+      bar_or19 = pn.pane.Vega().servable(target='bar-plot5')
+      bar_or20 = pn.pane.Vega().servable(target='bar-plot6')
+      bar_or21 = pn.pane.Vega().servable(target='bar-plot7')
+      bar_or22 = pn.pane.Vega().servable(target='bar-plot8')
+
           
       title = pn.pane.Markdown("""Operational Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2019-2022""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
           
       Main_data = pn.pane.Markdown("""Main Dataset""").servable(target='Main_data')
-      value_des = pn.pane.Markdown("""Analysis of Successful Transactions by sales per Month""").servable(target='value_des')
-      customer_des = pn.pane.Markdown("""Analysis of Transactions by Customer per Month""").servable(target='cus_des')
+      value_des = pn.pane.Markdown("""Analysis of Successful Transactions per Month""").servable(target='value_des')
+      customer_des = pn.pane.Markdown("""Analysis of Successful Orders per Month""").servable(target='cus_des')
       region_des = pn.pane.Markdown("""Analysis of Transactions by Region per Month""").servable(target='region_des')
+
+
+      df1 = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/test.csv'), sep=";")
+      df1.columns = df1.columns.str.replace(' ', '_')
+      df1["Date_Faktur"] = df1["Date_Faktur"].replace(['2021-11-00'],'01/11/21')
+
+      df_c = df1.copy()
+      df_c['Request_Date'] = pd.to_datetime(df_c['Request_Date'])
+      df_c['Year'] = df_c['Request_Date'].dt.strftime('%Y')
+      d19 = df_c[df_c.Year == '2019']
+      d19.name = '2019'
+      d20 = df_c[df_c.Year == '2020']
+      d20.name = '2020'
+      d21 = df_c[df_c.Year == '2021']
+      d21.name = '2021'
+      d22 = df_c[df_c.Year == '2022']
+      d22.name = '2022'
+
+      Faktur = df1[df1.Date_Faktur != '-']
+      Ft_copy = Faktur.copy()
+      Ft_copy['Date_Faktur'] = pd.to_datetime(Ft_copy['Date_Faktur'])
+      Ft_copy['Year'] = Ft_copy['Date_Faktur'].dt.strftime('%Y')
+      F19 = Ft_copy[Ft_copy.Year == '2019']
+      F19.name = '2019'
+      F20 = Ft_copy[Ft_copy.Year == '2020']
+      F20.name = '2020'
+      F21 = Ft_copy[Ft_copy.Year == '2021']
+      F21.name = '2021'
+      F22 = Ft_copy[Ft_copy.Year == '2022']
+      F22.name = '2022'
            
     
       selection = alt.selection_single(fields=['Item_Type'], bind='legend')
       selector = alt.selection_single(fields=['Item_Type'])
 
-      selection_o = alt.selection_single(fields=['nama_customer'], bind='legend')
-      selector_o = alt.selection_single(fields=['nama_customer'])
+      selection_o = alt.selection_single(fields=['Hospital_Name'], bind='legend')
+      selector_o = alt.selection_single(fields=['Hospital_Name'])
     
       def get_bar_value(df):
           A_copy = df.copy()
           A_copy['Date_Faktur'] = pd.to_datetime(A_copy['Date_Faktur'])
-          A_m = A_copy.groupby([A_copy['Date_Faktur'], A_copy['Id_Orders']])['Total_Faktur'].sum()
+          A_m = A_copy.groupby([A_copy['Date_Faktur'], A_copy['Id_Orders'], A_copy['Item_Type'], A_copy['Order_By'], A_copy['Hospital_Name']])['Total_Faktur'].sum()
           A_m = A_m.reset_index()   
           A_m['Date_Faktur'] = A_m['Date_Faktur'].dt.strftime('%Y-%m')
           return(
@@ -163,14 +213,28 @@
             .encode(
               y='Total_Faktur',
               x='Date_Faktur',
-              tooltip=[alt.Tooltip('Total_Faktur',format=",.2f")]
+              color = 'Item_Type',
+              tooltip=[alt.Tooltip('Total_Faktur',format=",.2f"), 'Order_By', 'Hospital_Name'],
+              order = alt.Order(
+                'Id_Orders',
+                sort = 'ascending'
+              )
             )
+            .properties(
+              height=600, width=500, title="Total Faktur"
+            )
+            .add_selection(
+              selection, selector
+            )
+            .transform_filter(
+              selection&selector
+            ) 
           )
 
       def get_bar_order(df):
           A_copy = df.copy()
           A_copy['Request_Date'] = pd.to_datetime(A_copy['Request_Date'])
-          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Order_By']])['Id_Orders'].count()
+          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Hospital_Name'], A_copy['Order_By'], A_copy['Via']])['Id_Orders'].count()
           A_m = A_m.reset_index()   
           A_m['Request_Date'] = A_m['Request_Date'].dt.strftime('%Y-%m')
           return(
@@ -179,27 +243,34 @@
             .encode(
               y='Id_Orders',
               x='Request_Date',
-              color= alt.Color('Order_By', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
-              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Order_By'],
+              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=150), scale=alt.Scale(scheme='tableau20')),
+              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
               order = alt.Order(
                 'Id_Orders',
                 sort = 'ascending'
               )
             )
             .properties(
-              height=600, width=500, title="Total Order Chart"
+              height=600, width=500, title="Total Order"
             )
             .add_selection(
-              selection, selector
+              selection_o, selector_o
             )
             .transform_filter(
-              selection&selector
+              selection_o&selector_o
             )
           )    
 
       Main_table.value = df1   
-      bar_vae.object = get_bar_value(Faktur)
-      bar_val.object = get_bar_order(df1)
+      bar_va19.object = get_bar_value(F19)
+      bar_va20.object = get_bar_value(F20)
+      bar_va21.object = get_bar_value(F21)
+      bar_va22.object = get_bar_value(F22)
+
+      bar_or19.object = get_bar_order(d19)
+      bar_or20.object = get_bar_order(d20)
+      bar_or21.object = get_bar_order(d21)
+      bar_or22.object = get_bar_order(d22)
          
     </py-script>
     
