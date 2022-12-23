@@ -107,21 +107,10 @@
       <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot4"></div>
     </div>
     
-  
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
-    <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot5"></div>
-      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot6"></div>
-    </div>
-
-    <div class = "box">
-      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot7"></div>
-      <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot8"></div>
-    </div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
     
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="cluster-plot"></div>
-
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
     <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Main_data"></h3>
@@ -149,10 +138,8 @@
       bar_va20 = pn.pane.Vega().servable(target='bar-plot2')
       bar_va21 = pn.pane.Vega().servable(target='bar-plot3')
       bar_va22 = pn.pane.Vega().servable(target='bar-plot4')
-      bar_or19 = pn.pane.Vega().servable(target='bar-plot5')
-      bar_or20 = pn.pane.Vega().servable(target='bar-plot6')
-      bar_or21 = pn.pane.Vega().servable(target='bar-plot7')
-      bar_or22 = pn.pane.Vega().servable(target='bar-plot8')
+      bar_or = pn.pane.Vega().servable(target='bar-plot5')
+      
 
       chart = pn.pane.Vega().servable(target='cluster-plot')
 
@@ -170,17 +157,6 @@
       df1.columns = df1.columns.str.replace(' ', '_')
       df1["Date_Faktur"] = df1["Date_Faktur"].replace(['2021-11-00'],'01/11/21')
 
-      df_c = df1.copy()
-      df_c['Request_Date'] = pd.to_datetime(df_c['Request_Date'])
-      df_c['Year'] = df_c['Request_Date'].dt.strftime('%Y')
-      d19 = df_c[df_c.Year == '2019']
-      d19.name = '2019'
-      d20 = df_c[df_c.Year == '2020']
-      d20.name = '2020'
-      d21 = df_c[df_c.Year == '2021']
-      d21.name = '2021'
-      d22 = df_c[df_c.Year == '2022']
-      d22.name = '2022'
 
       Faktur = df1[df1.Date_Faktur != '-']
       Ft_copy = Faktur.copy()
@@ -231,35 +207,86 @@
               selection&selector
             ) 
           )
-
+          
       def get_bar_order(df):
           A_copy = df.copy()
+          A_copy1 = A_copy.copy()
           A_copy['Request_Date'] = pd.to_datetime(A_copy['Request_Date'])
-          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Hospital_Name'], A_copy['Order_By'], A_copy['Via']])['Id_Orders'].count()
+          A_copy1['Request_Date'] = pd.to_datetime(A_copy1['Request_Date'])
+          A_copy['Year'] = A_copy1['Request_Date'].dt.strftime('%Y')          
+          A_m = A_copy.groupby([A_copy['Request_Date'], A_copy['Hospital_Name'], A_copy['Order_By'], A_copy['Via'], A_copy['Year']])['Id_Orders'].count()
           A_m = A_m.reset_index()   
           A_m['Request_Date'] = A_m['Request_Date'].dt.strftime('%Y-%m')
+          d19 = A_m[A_m.Year == '2019']
+          d20 = A_m[A_m.Year == '2020']
+          d21 = A_m[A_m.Year == '2021']
+          d22 = A_m[A_m.Year == '2022']
+          upper1 = alt.Chart(d19).mark_bar().encode(
+            y='Id_Orders',
+            x='Request_Date',
+            color= alt.Color('Hospital_Name', scale=alt.Scale(scheme='tableau20')),
+            tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
+            order = alt.Order(
+              'Id_Orders',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Total Order 2019"
+          ).add_selection(
+            selection_o, selector_o
+          ).transform_filter(
+            selection_o&selector_o
+          )
+          upper2 = alt.Chart(d20).mark_bar().encode(
+            y='Id_Orders',
+            x='Request_Date',
+            color= alt.Color('Hospital_Name', scale=alt.Scale(scheme='tableau20')),
+            tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
+            order = alt.Order(
+              'Id_Orders',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Total Order 2020"
+          ).add_selection(
+            selection_o, selector_o
+          ).transform_filter(
+            selection_o&selector_o
+          )
+          lower1 = alt.Chart(d21).mark_bar().encode(
+            y='Id_Orders',
+            x='Request_Date',
+            color= alt.Color('Hospital_Name', legend=alt.Legend(symbolLimit=300,columns=3), scale=alt.Scale(scheme='tableau20')),
+            tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
+            order = alt.Order(
+              'Id_Orders',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Total Order 2021"
+          ).add_selection(
+            selection_o, selector_o
+          ).transform_filter(
+            selection_o&selector_o
+          )
+          lower2 = alt.Chart(d22).mark_bar().encode(
+            y='Id_Orders',
+            x='Request_Date',
+            color= alt.Color('Hospital_Name', scale=alt.Scale(scheme='tableau20')),
+            tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
+            order = alt.Order(
+              'Id_Orders',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Total Order 2022"
+          ).add_selection(
+            selection_o, selector_o
+          ).transform_filter(
+            selection_o&selector_o
+          )
           return(
-            alt.Chart(A_m)
-            .mark_bar()
-            .encode(
-              y='Id_Orders',
-              x='Request_Date',
-              color= alt.Color('Hospital_Name',legend=alt.Legend(symbolLimit=130), scale=alt.Scale(scheme='tableau20')),
-              tooltip=[alt.Tooltip('Id_Orders',format=",.2f"), 'Hospital_Name', 'Order_By', 'Via'],
-              order = alt.Order(
-                'Id_Orders',
-                sort = 'ascending'
-              )
-            )
-            .properties(
-              height=600, width=500, title="Total Order"
-            )
-            .add_selection(
-              selection_o, selector_o
-            )
-            .transform_filter(
-              selection_o&selector_o
-            )
+            alt.vconcat((upper1 | upper2), (lower1 | lower2))
           )
       
 
@@ -269,11 +296,8 @@
       bar_va21.object = get_bar_value(F21)
       bar_va22.object = get_bar_value(F22)
 
-      bar_or19.object = get_bar_order(d19)
-      bar_or20.object = get_bar_order(d20)
-      bar_or21.object = get_bar_order(d21)
-      bar_or22.object = get_bar_order(d22)
-
+      bar_or.object = get_bar_order(df1)
+    
          
     </py-script>
     
