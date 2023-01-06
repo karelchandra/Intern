@@ -97,22 +97,26 @@
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot1"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot2"></div>
+    </div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
   
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
     </header>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot6"></div>
+    <div class="bk-root" style="margin-top:10px; margin-left: 20%;" id="bar-plot5"></div>
+    <div class="bk-root" style="margin-top:10px; margin-left: 21%;" id="bar-plot6"></div>
 
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="region_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot7"></div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot8"></div>
+    <div class = "box">
+      <div class="bk-root" style="margin-top:10px; margin-left: 3%;" id="bar-plot7"></div>
+      <div class="bk-root" style="margin-top:10px; margin-left: 42%;" id="bar-plot8"></div>
+    </div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot9"></div>
 	  
 
@@ -282,7 +286,7 @@
               .mark_bar()
               .encode(
                 y='nilai',
-                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=600,columns = 6,orient='none',legendX=-280, legendY=650, direction='horizontal', titleAnchor='middle'), scale=alt.Scale(scheme='tableau20')),
                 x='bulan',
                 tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
                 order = alt.Order(
@@ -306,7 +310,7 @@
               .mark_bar()
               .encode(
                 y='nilai',
-                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=90), scale=alt.Scale(scheme='tableau20')),
+                color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=700,columns = 6,orient='none',legendX=-280, legendY=650, direction='horizontal', titleAnchor='middle'), scale=alt.Scale(scheme='tableau20')),
                 x='bulan',
                 tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
                 order = alt.Order(
@@ -335,7 +339,7 @@
           A_ms2 = A_ms2.reset_index() 
           s1 = alt.Chart(A_ms1).mark_bar().encode(
             y='nilai',
-            color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=100)),
+            color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=1250,columns = 6,orient='none',legendX=10, legendY=650, direction='horizontal', titleAnchor='middle')),
             x='bulan',
             tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
             order = alt.Order(
@@ -351,7 +355,7 @@
             )
           s2 = alt.Chart(A_ms2).mark_bar().encode(
             y='nilai',
-            color= alt.Color('nama_customer', legend=alt.Legend(symbolLimit=100)),
+            color= alt.Color('nama_customer'),
             x='bulan',
             tooltip=[alt.Tooltip('nilai',format=",.2f"), 'nama_customer', 'namaPS'],
             order = alt.Order(
