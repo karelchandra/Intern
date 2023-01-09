@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#000000">
     <meta name="name" content="Report Based On Operational">
 
-    <title>Operational Report 2019-2022</title>
+    <title>Shipping Report 2022-2023</title>
     <!-- <link rel="icon" type="image/x-icon" href="./favicon.png"> -->
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" type="text/css" />
@@ -69,7 +69,6 @@
       "scikit-learn",
       "panel==0.13.1",
       "matplotlib",
-      "io",
       "requests"
     ]
   </py-config>
@@ -156,8 +155,11 @@
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='Main_table')
       
       url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/SHIPPING_WMS_2022-2023.xlsx'
-      data = rq.get(url.content)
-      df_all = pd.read_excel(BytesIO(data))
+      # Load file with `sheet_name=None` - returns a dictionary
+      df_dict = pd.read_excel(url, sheet_name=None)
+
+      # Combine data from all worksheets as single DataFrame
+      df_all = pd.concat(df_dict.values(), ignore_index=True)
       df_all.columns = df_all.columns.str.replace(' ', '_')
       df_all.columns = df_all.columns.str.replace('.', ' ')
 
