@@ -154,15 +154,9 @@
 
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='Main_table')
       
-      url = 'https://raw.githubusercontent.com/karelchandra/Intern/main/SHIPPING_WMS_2022-2023.xlsx'
-      # Load file with `sheet_name=None` - returns a dictionary
-      df_dict = pd.read_excel(url, sheet_name=None)
-
-      # Combine data from all worksheets as single DataFrame
-      df_all = pd.concat(df_dict.values(), ignore_index=True)
+      df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/shipping_combine.csv'))
       df_all.columns = df_all.columns.str.replace(' ', '_')
-      df_all.columns = df_all.columns.str.replace('.', ' ')
-
+      df_all.columns = df_all.columns.str.replace('.', '')
 
       Main_table.value = df_all   
     
