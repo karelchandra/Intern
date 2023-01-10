@@ -99,32 +99,17 @@
     </header>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
     
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="per_des">
+    </header>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
+    
 
     <div class = "box">
       <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot3"></div>
       <div class="bk-root" style="margin-top:10px; margin-left: 41%;" id="bar-plot4"></div>
     </div>
     
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="cus_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot5"></div>
     
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="set_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot6"></div>
-
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="sys_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot7"></div>
-
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="db_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot8"></div>
-
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="pb_des">
-    </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot9"></div>
-
 
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
@@ -149,34 +134,44 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
 
-
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
       
       bar_qtys1s2 = pn.pane.Vega().servable(target='bar-plot1')
+      bar_persons1s2 = pn.pane.Vega().servable(target='bar-plot2')
       
       title = pn.pane.Markdown("""Shipping WMS Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2022-2023""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
       combine_data = pn.pane.Markdown("""All Dataset""").servable(target='combine_data')
       qty_des = pn.pane.Markdown("""Analysis of Quantity per Item""").servable(target='qty_des')
+      per_des = pn.pane.Markdown("""Analysis of Quantity per Person""").servable(target='per_des')
      
       
       df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/shipping_combine.csv'), low_memory=False)
       df_all.columns = df_all.columns.str.replace(' ', '_')
       df_all.columns = df_all.columns.str.replace('.', '')
-      df_all = df_all.dropna(subset=['POSTING_DATE'])
+      df_all = df_all.dropna(subset=['POSTING_DATE','PERSON_NAME', 'ITEM_NAME', 'ITEM_CODE'])
+
       df_all['ITEM_CODE'] = df_all['ITEM_CODE'].values.astype('str')
+      df_all['PERSON_NAME'] = df_all['PERSON_NAME'].values.astype('str')
+      df_all['ITEM_NAME'] = df_all['ITEM_NAME'].values.astype('str')
+      df_all['QTY'] = df_all['QTY'].values.astype('int')
       
     
       selection = alt.selection_single(fields=['ITEM_CODE'], bind='legend')
       selector = alt.selection_single(fields=['ITEM_CODE'])
+
+      selection_p = alt.selection_single(fields=['PERSON_NAME'], bind='legend')
+      selector_p = alt.selection_single(fields=['PERSON_NAME'])
+
 
       def get_qty(df):
           df_copy_a = df.copy()
           df_copy_a['POSTING_DATE'] = pd.to_datetime(df_copy_a['POSTING_DATE'])
           df['Bulan'] = df_copy_a['POSTING_DATE'].dt.strftime('%m')
           df['Bulan'] = df['Bulan'].values.astype('int')
-
+          
+          pd.options.mode.chained_assignment = None
           dfs1 = df[df.Bulan < 7]
           dfs2 = df[df.Bulan > 6]
 
@@ -194,7 +189,7 @@
             y = 'QTY',
             x = 'POSTING_DATE',
             color= alt.Color('ITEM_CODE'),
-            tooltip=['ITEM_CODE', 'QTY', 'ITEM_NAME'],
+            tooltip=['ITEM_CODE', 'ITEM_NAME', 'QTY'],
             order = alt.Order(
               'QTY',
               sort = 'ascending'
@@ -207,29 +202,215 @@
               selection&selector
             )
           s2 = alt.Chart(df_sum_item_s2).mark_bar().encode(
-              y = 'QTY',
-              x = 'POSTING_DATE',
-              color= alt.Color('ITEM_CODE', legend=alt.Legend(symbolLimit=1300,columns = 10,orient='none',legendX=-50, legendY=670, direction='horizontal', titleAnchor='middle')),
-              tooltip=['ITEM_CODE', 'QTY', 'ITEM_NAME'],
-              order = alt.Order(
-                'QTY',
-                sort = 'ascending'
+            y = 'QTY',
+            x = 'POSTING_DATE',
+            color= alt.Color('ITEM_CODE', legend=alt.Legend(symbolLimit=1300,columns = 10,orient='none',legendX=-50, legendY=670, direction='horizontal', titleAnchor='middle')),
+            tooltip=['ITEM_CODE', 'ITEM_NAME', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="S2"
+          ).add_selection(
+            selection, selector
+          ).transform_filter(
+            selection&selector
+          )
+          return (
+            s1 | s2
+          )
+
+      def get_person1(df):
+          df_copy_a = df.copy()
+          df_copy_a['POSTING_DATE'] = pd.to_datetime(df_copy_a['POSTING_DATE'])
+          df['Bulan'] = df_copy_a['POSTING_DATE'].dt.strftime('%m')
+          df['Bulan'] = df['Bulan'].values.astype('int')
+    
+          pd.options.mode.chained_assignment = None
+          dfq1 = df[df.Bulan < 4]
+          dfq2 = df[(df.Bulan > 3) & (df.Bulan < 7)]
+          dfq3 = df[(df.Bulan > 6) & (df.Bulan < 10)]
+          dfq4 = df[(df.Bulan > 9) & (df.Bulan < 13)]
+         
+
+          dfq1['POSTING_DATE'] = pd.to_datetime(dfq1['POSTING_DATE'])
+          df_sum_item_q1 = dfq1.groupby([dfq1['POSTING_DATE'].dt.to_period('M'), dfq1['PERSON_NAME'], dfq1['ITEM_CODE'], dfq1['ITEM_NAME']])['QTY'].sum()
+          df_sum_item_q1 =df_sum_item_q1.reset_index()  
+          df_sum_item_q1['POSTING_DATE'] = df_sum_item_q1['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+          dfq2['POSTING_DATE'] = pd.to_datetime(dfq2['POSTING_DATE'])
+          df_sum_item_q2 = dfq2.groupby([dfq2['POSTING_DATE'].dt.to_period('M'), dfq2['PERSON_NAME'], dfq2['ITEM_CODE'], dfq2['ITEM_NAME']])['QTY'].sum()
+          df_sum_item_q2 =df_sum_item_q2.reset_index()  
+          df_sum_item_q2['POSTING_DATE'] = df_sum_item_q2['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+          dfq3['POSTING_DATE'] = pd.to_datetime(dfq3['POSTING_DATE'])
+          df_sum_item_q3 = dfq3.groupby([dfq3['POSTING_DATE'].dt.to_period('M'), dfq3['PERSON_NAME'], dfq3['ITEM_CODE'], dfq3['ITEM_NAME']])['QTY'].sum()
+          df_sum_item_q3 =df_sum_item_q3.reset_index()  
+          df_sum_item_q3['POSTING_DATE'] = df_sum_item_q3['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+          dfq4['POSTING_DATE'] = pd.to_datetime(dfq4['POSTING_DATE'])
+          df_sum_item_q4 = dfq4.groupby([dfq4['POSTING_DATE'].dt.to_period('M'), dfq4['PERSON_NAME'], dfq4['ITEM_CODE'], dfq4['ITEM_NAME']])['QTY'].sum()
+          df_sum_item_q4 =df_sum_item_q4.reset_index()  
+          df_sum_item_q4['POSTING_DATE'] = df_sum_item_q4['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+          q1 = alt.Chart(df_sum_item_q1).mark_bar().encode(
+            y = 'QTY',
+            x = 'POSTING_DATE',
+            color= alt.Color('PERSON_NAME'),
+            tooltip=['PERSON_NAME','ITEM_CODE', 'ITEM_NAME', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
               )
             ).properties(
-              height=600, width=500, title="S2"
+              height=600, width=500, title="Q1"
             ).add_selection(
               selection, selector
             ).transform_filter(
               selection&selector
             )
-          return (
-            s1 | s2
+
+          q2 = alt.Chart(df_sum_item_q2).mark_bar().encode(
+            y = 'QTY',
+            x = 'POSTING_DATE',
+            color= alt.Color('PERSON_NAME'),
+            tooltip=['PERSON_NAME','ITEM_CODE', 'ITEM_NAME', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Q2"
+          ).add_selection(
+            selection, selector
+          ).transform_filter(
+            selection&selector
           )
+
+          q3 = alt.Chart(df_sum_item_q3).mark_bar().encode(
+            y = 'QTY',
+            x = 'POSTING_DATE',
+            color= alt.Color('PERSON_NAME', legend=alt.Legend(symbolLimit=130,columns = 4,orient='none',legendX=-50, legendY=670, direction='horizontal', titleAnchor='middle')),
+            tooltip=['PERSON_NAME','ITEM_CODE', 'ITEM_NAME', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Q3"
+          ).add_selection(
+            selection, selector
+          ).transform_filter(
+            selection&selector
+          )
+
+          q4 = alt.Chart(df_sum_item_q4).mark_bar().encode(
+            y = 'QTY',
+            x = 'POSTING_DATE',
+            color= alt.Color('PERSON_NAME', legend=alt.Legend(symbolLimit=1300,columns = 10,orient='none',legendX=100, legendY=970, direction='horizontal', titleAnchor='middle')),
+            tooltip=['PERSON_NAME','ITEM_CODE', 'ITEM_NAME', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
+            )
+          ).properties(
+            height=600, width=500, title="Q4"
+          ).add_selection(
+            selection, selector
+          ).transform_filter(
+            selection&selector
+          )
+          return (
+            alt.vconcat((q1 | q2), q3)
+          )
+
+      def get_person(df):
+        df_copy_a = df.copy()
+        df_copy_a['POSTING_DATE'] = pd.to_datetime(df_copy_a['POSTING_DATE'])
+        df['Bulan'] = df_copy_a['POSTING_DATE'].dt.strftime('%m')
+        df['Bulan'] = df['Bulan'].values.astype('int')
+
+        pd.options.mode.chained_assignment = None
+        dfq1 = df[df.Bulan < 4]
+        dfq2 = df[(df.Bulan > 3) & (df.Bulan < 7)]
+        dfq3 = df[(df.Bulan > 6) & (df.Bulan < 10)]
+        dfq4 = df[(df.Bulan > 9) & (df.Bulan <= 12)]
+
+        dfq1['POSTING_DATE'] = pd.to_datetime(dfq1['POSTING_DATE'])
+        df_sum_item_q1 = dfq1.groupby([dfq1['POSTING_DATE'].dt.to_period('M'), dfq1['PERSON_NAME'], dfq1['ITEM_CODE'], dfq1['ITEM_NAME']])['QTY'].sum()
+        df_sum_item_q1 =df_sum_item_q1.reset_index()  
+        df_sum_item_q1['POSTING_DATE'] = df_sum_item_q1['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+        
+        dfq2['POSTING_DATE'] = pd.to_datetime(dfq2['POSTING_DATE'])
+        df_sum_item_q2 = dfq2.groupby([dfq2['POSTING_DATE'].dt.to_period('M'), dfq2['PERSON_NAME'], dfq2['ITEM_CODE'], dfq2['ITEM_NAME']])['QTY'].sum()
+        df_sum_item_q2 =df_sum_item_q2.reset_index()  
+        df_sum_item_q2['POSTING_DATE'] = df_sum_item_q2['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+
+        dfq3['POSTING_DATE'] = pd.to_datetime(dfq3['POSTING_DATE'])
+        df_sum_item_q3 = dfq3.groupby([dfq3['POSTING_DATE'].dt.to_period('M'), dfq3['PERSON_NAME'], dfq3['ITEM_CODE'], dfq3['ITEM_NAME']])['QTY'].sum()
+        df_sum_item_q3 =df_sum_item_q3.reset_index()  
+        df_sum_item_q3['POSTING_DATE'] = df_sum_item_q3['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+        dfq4['POSTING_DATE'] = pd.to_datetime(dfq4['POSTING_DATE'])
+        df_sum_item_q4 = dfq4.groupby([dfq4['POSTING_DATE'].dt.to_period('M'), dfq4['PERSON_NAME'], dfq4['ITEM_CODE'], dfq4['ITEM_NAME']])['QTY'].sum()
+        df_sum_item_q4 =df_sum_item_q4.reset_index()  
+        df_sum_item_q4['POSTING_DATE'] = df_sum_item_q4['POSTING_DATE'].dt.to_timestamp('s').dt.strftime('%Y-%m')
+          
+       
+        q1 = alt.Chart(df_sum_item_q1).mark_bar().encode(
+          y = 'QTY',
+          x = 'POSTING_DATE',
+          color= alt.Color('PERSON_NAME'),
+          tooltip=['PERSON_NAME','ITEM_CODE', 'QTY', 'ITEM_NAME'],
+          order = alt.Order(
+            'QTY',
+            sort = 'ascending'
+            )
+          )
+
+        q2 = alt.Chart(df_sum_item_q2).mark_bar().encode(
+          y = 'QTY',
+          x = 'POSTING_DATE',
+          color= alt.Color('PERSON_NAME'),
+          tooltip=['PERSON_NAME','ITEM_CODE', 'QTY', 'ITEM_NAME'],
+          order = alt.Order(
+            'QTY',
+            sort = 'ascending'
+            )
+          )
+        q3 = alt.Chart(df_sum_item_q3).mark_bar().encode(
+          y = 'QTY',
+          x = 'POSTING_DATE',
+          color= alt.Color('PERSON_NAME'),
+          tooltip=['PERSON_NAME','ITEM_CODE', 'QTY', 'ITEM_NAME'],
+          order = alt.Order(
+            'QTY',
+            sort = 'ascending'
+            )
+          )
+
+        q4 = alt.Chart(df_sum_item_q4).mark_bar().encode(
+          y = 'QTY',
+          x = 'POSTING_DATE',
+          color= alt.Color('PERSON_NAME'),
+          tooltip=['PERSON_NAME','ITEM_CODE', 'ITEM_NAME', 'QTY'],
+          order = alt.Order(
+            'QTY',
+            sort = 'ascending'
+            )
+          )
+        
+
+        return (
+          q4
+        )
 
 
       Main_table.value = df_all
       
       bar_qtys1s2.object = get_qty(df_all)
+      bar_persons1s2.object = get_person(df_all)
       
 
     
