@@ -132,7 +132,7 @@
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
-    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="Main_data"></h3>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="combine_data"></h3>
     <div class="bk-root" id="Main_table"></div>
     
         
@@ -153,12 +153,51 @@
 
 
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='Main_table')
+
+      bar_qty = pn.pane.Vega().servable(target='bar-plot1')
+
+      title = pn.pane.Markdown("""Shipping WMS Report""").servable(target='title')
+      subtitle = pn.pane.Markdown("""2022-2023""").servable(target='subtitle')
+      table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
+      combine_data = pn.pane.Markdown("""All Dataset""").servable(target='combine_data')
       
-      df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/shipping_combine.csv'))
+      df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/shipping_combine.csv'), low_memory=False)
       df_all.columns = df_all.columns.str.replace(' ', '_')
       df_all.columns = df_all.columns.str.replace('.', '')
+      df_all['ITEM_CODE'] = df_all['ITEM_CODE'].values.astype('str')
+      df_copy = df_all.copy()
+      df_copy['POSTING_DATE'] = pd.to_datetime(df_copy1['POSTING_DATE'])
+      df_all['Bulan'] = df_copy1['POSTING_DATE'].dt.strftime('%m')
 
-      Main_table.value = df_all   
+      selection = alt.selection_single(fields=['ITEM_CODE'], bind='legend')
+      selector = alt.selection_single(fields=['ITEM_CODE'])
+
+      def get_qty(df):
+          df_copy = df.copy()
+          df_sum_item = df_copy.groupby([df_copy['POSTING_DATE'].dt.to_period('M'), df_copy['ITEM_CODE']])['QTY'].sum()
+          df_sum_item = df_sum_item.reset_index()  
+          s1 = alt.Chart(df_sum_item).mark_bar().encode(
+            y='QTY',
+            x='POSTING_DATE',
+            color= alt.Color('ITEM_CODE', legend=alt.Legend(symbolLimit=1250,columns = 6,orient='none',legendX=10, legendY=650, direction='horizontal', titleAnchor='middle')),
+            tooltip=['ITEM_CODE', 'QTY'],
+            order = alt.Order(
+              'QTY',
+              sort = 'ascending'
+              )
+            ).properties(
+              height=600, width=500, title="QTY per Item"
+            ).add_selection(
+              selection, selector
+            ).transform_filter(
+              selection&selector
+            )
+          return(
+            s1 
+          )
+
+      Main_table.value = df_all  
+      bar_qty.object =  get_qty(df_all)
     
     </py-script>
     
