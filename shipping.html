@@ -68,8 +68,7 @@
       "numpy",
       "scikit-learn",
       "panel==0.13.1",
-      "matplotlib",
-      "requests"
+      "matplotlib"
     ]
   </py-config>
   
@@ -96,7 +95,7 @@
       <h1 class="w3-xxlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="subtitle"></h1>
     </div>
 
-    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="value_des">
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="qty_des">
     </header>
     <div class = "box">
       <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot1"></div>
@@ -135,6 +134,9 @@
     <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="combine_data"></h3>
     <div class="bk-root" id="Main_table"></div>
     
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="s1_data"></h3>
+    <div class="bk-root" id="S1_table"></div>
+    
         
     <py-script>
       import warnings
@@ -153,27 +155,38 @@
 
 
       Main_table = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='Main_table')
+      S1_table  = pn.widgets.Tabulator(pagination='remote', page_size=10).servable(target='S1_table')
 
-      bar_qty = pn.pane.Vega().servable(target='bar-plot1')
+      bar_qtys1 = pn.pane.Vega().servable(target='bar-plot1')
+      bar_qtys2 = pn.pane.Vega().servable(target='bar-plot2')
 
       title = pn.pane.Markdown("""Shipping WMS Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2022-2023""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
       combine_data = pn.pane.Markdown("""All Dataset""").servable(target='combine_data')
+      s1_data = pn.pane.Markdown("""S1 Dataset""").servable(target='s1_data')
+      qty_des = pn.pane.Markdown("""Analysis of Quantity per Item""").servable(target='qty_des')
+     
       
       df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/shipping_combine.csv'), low_memory=False)
       df_all.columns = df_all.columns.str.replace(' ', '_')
       df_all.columns = df_all.columns.str.replace('.', '')
+      df_all = df_all.dropna(subset=['POSTING_DATE'])
       df_all['ITEM_CODE'] = df_all['ITEM_CODE'].values.astype('str')
-      df_copy = df_all.copy()
-      df_copy['POSTING_DATE'] = pd.to_datetime(df_copy1['POSTING_DATE'])
-      df_all['Bulan'] = df_copy1['POSTING_DATE'].dt.strftime('%m')
+      df_copy_a = df_all.copy()
+      df_copy_a['POSTING_DATE'] = pd.to_datetime(df_copy_a['POSTING_DATE'])
+      df_all['Bulan'] = df_copy_a['POSTING_DATE'].dt.strftime('%m')
+      df_all['Bulan'] = df_all['Bulan'].values.astype('int')
+      dfs1 = df_all[df_all.Bulan < 7]
+      dfs2 = df_all[df_all.Bulan > 6]
+      
 
       selection = alt.selection_single(fields=['ITEM_CODE'], bind='legend')
       selector = alt.selection_single(fields=['ITEM_CODE'])
 
       def get_qty(df):
           df_copy = df.copy()
+          df_copy['POSTING_DATE'] = pd.to_datetime(df_copy['POSTING_DATE'])
           df_sum_item = df_copy.groupby([df_copy['POSTING_DATE'].dt.to_period('M'), df_copy['ITEM_CODE']])['QTY'].sum()
           df_sum_item = df_sum_item.reset_index()  
           s1 = alt.Chart(df_sum_item).mark_bar().encode(
@@ -186,7 +199,7 @@
               sort = 'ascending'
               )
             ).properties(
-              height=600, width=500, title="QTY per Item"
+              height=600, width=500, title="QTY per Item S1"
             ).add_selection(
               selection, selector
             ).transform_filter(
@@ -195,9 +208,14 @@
           return(
             s1 
           )
+          
 
-      Main_table.value = df_all  
-      bar_qty.object =  get_qty(df_all)
+
+      Main_table.value = df_all
+      S1_table.value = dfs1
+      
+      
+
     
     </py-script>
     
