@@ -541,7 +541,7 @@
               sort = 'ascending'
               )
             ).properties(
-              height=600, width=400, title="Q1"
+              height=600, width=500, title="Q1"
             ).add_selection(
               selection_loc, selector_loc
             ).transform_filter(
@@ -558,7 +558,7 @@
               sort = 'ascending'
             )
           ).properties(
-            height=600, width=400, title="Q2"
+            height=600, width=500, title="Q2"
           ).add_selection(
             selection_loc, selector_loc
           ).transform_filter(
@@ -575,7 +575,7 @@
               sort = 'ascending'
             )
           ).properties(
-            height=600, width=400, title="Q3"
+            height=600, width=500, title="Q3"
           ).add_selection(
             selection_loc, selector_loc
           ).transform_filter(
@@ -592,24 +592,7 @@
               sort = 'ascending'
             )
           ).properties(
-            height=600, width=400, title="Q4"
-          ).add_selection(
-            selection_loc, selector_loc
-          ).transform_filter(
-            selection_loc&selector_loc
-          )
-
-          qe = alt.Chart(df_sum_item_qe).mark_bar().encode(
-            y = 'QTY',
-            x = 'POSTING_DATE',
-            color= alt.Color('LOCATION', legend=alt.Legend(symbolLimit=305,columns = 4,orient='none',legendX=900, legendY=700, direction='horizontal', titleAnchor='middle')),
-            tooltip=['LOCATION','ITEM_CODE', 'ITEM_NAME', 'QTY'],
-            order = alt.Order(
-              'QTY',
-              sort = 'ascending'
-            )
-          ).properties(
-            height=600, width=400, title="Q1 2023"
+            height=600, width=500, title="Q4"
           ).add_selection(
             selection_loc, selector_loc
           ).transform_filter(
