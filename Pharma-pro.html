@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#000000">
+    <meta name="name" content="Report Based On Operational">
+
+    <title>Shipping Report 2022-2023</title>
+    <!-- <link rel="icon" type="image/x-icon" href="./favicon.png"> -->
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/css/widgets.css" type="text/css" />
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/css/markdown.css" type="text/css" />
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.9.3/dist/js/tabulator.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-2.4.3.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-2.4.3.min.js"></script>
+    <script type="text/javascript" src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-2.4.3.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@holoviz/panel@0.13.1/dist/panel.min.js"></script>
+    <script type="text/javascript">
+      Bokeh.set_log_level("info");
+    </script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/bundled/bootstraptemplate/bootstrap.css">
+    <link rel="stylesheet" href="https://unpkg.com/@holoviz/panel@0.13.1/dist/bundled/defaulttheme/default.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+    <style>
+      #sidebar {
+        width: 350px;
+      }
+      .w3-sidebar {
+        z-index: 3;
+        width: 250px;
+        top: 43px;
+        bottom: 0;
+        height: inherit; 
+      }
+      .box div {
+        width: 100px;
+        display: inline-block;
+        padding: 1rem 1rem;
+        vertical-align: middle;
+      }
+
+
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+  </head>
+
+  <py-config>
+    packages = [
+      "altair",
+      "pandas",
+      "numpy",
+      "scikit-learn",
+      "panel==0.13.1",
+      "matplotlib"
+    ]
+  </py-config>
+  
+  <body>
+
+    <div class="container-fluid d-flex flex-column vh-100 overflow-hidden" id="container">
+      
+	  <div class="app-header">
+	    <a class="w3-xlarge navbar-brand app-logo" href="/">
+	    <img src="https://github.com/karelchandra/Intern/blob/main/Pro_Health.png?raw=true" class="app-logo" width = "100" height = "3000">
+	    </a>
+	  <a class="title" href="" style="color: #efebe3;">Report Analysis</a>
+      </div>
+  
+
+	  <div class="col mh-100 float-left w3-display-container" id="main">
+
+    <!-- Header -->
+    <div class="w3-container-padding-small" style="margin-top:15px" id="showcase">
+      <h2 class="w3-xxxlarge" style = "font-weight: bold" id="title"></h2>
+      <h1 class="w3-xxlarge w3-text-teal w3-padding-small" style = "font-weight: bold" id="subtitle"></h1>
+    </div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="qty_des">
+    </header>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
+    
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="per_des">
+    </header>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
+
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="pal_des">
+    </header>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
+    
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
+    </header>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="combine_data"></h3>
+    <div class="bk-root" id="Main_table"></div>
+    
+    
+        
+    <py-script>
+      import warnings
+      import altair as alt
+      import panel as pn
+      import pandas as pd
+      from io import BytesIO
+      import requests as rq
+          
+      pn.extension('vega')
+    
+      from pyodide.http import open_url
+    
+      warnings.simplefilter(action='ignore', category=FutureWarning)
+      pn.config.sizing_mode = 'stretch_width'
+
+      Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
+      
+      bar_qtys1s2 = pn.pane.Vega().servable(target='bar-plot1')
+      bar_persons1s2 = pn.pane.Vega().servable(target='bar-plot2')
+      bar_pal = pn.pane.Vega().servable(target='bar-plot3')
+      bar_loc = pn.pane.Vega().servable(target='bar-plot4')
+      
+      title = pn.pane.Markdown("""Pharma Pro Report""").servable(target='title')
+      subtitle = pn.pane.Markdown("""2022""").servable(target='subtitle')
+      table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
+      ASMIUA_data = pn.pane.Markdown("""ASMIUA Dataset""").servable(target='ASMIUA_data')
+      qty_des = pn.pane.Markdown("""Analysis of Quantity per Item""").servable(target='qty_des')
+      per_des = pn.pane.Markdown("""Analysis of Quantity per Person""").servable(target='per_des')
+      pal_des = pn.pane.Markdown("""Analysis of Pallet and Location""").servable(target='pal_des')
+     
+      
+      df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/ASMIUA.csv'), low_memory=False)
+      df_all.columns = df_all.columns.str.replace(' ', '_')
+      df_all.columns = df_all.columns.str.replace('.', ' ')
+      
+      Main_table.value = df_all
+      
+      bar_qtys1s2.object = get_qty(df_all)
+      bar_persons1s2.object = get_person(df_all)
+      bar_pal.object = get_pal(df_all)
+      bar_loc.object = get_loc(df_all)
+      
+      
+
+    
+    </py-script>
+    
+  </body>
+
+</html>
