@@ -115,6 +115,27 @@
         <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot6"></div>
       </div>
     
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="mc_des">
+    </header>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot7"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot10"></div>
+      </div>
+    
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="spi_des">
+    </header>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot8"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot11"></div>
+      </div>
+    
+    <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="pers_des">
+    </header>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot9"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot12"></div>
+      </div>
+    
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
     <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="ASMIUA_des"></h3>
@@ -125,7 +146,15 @@
 
     <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="PERAPI_des"></h3>
     <div class="bk-root" id="PERAPI_table"></div>
+
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="MCUE_des"></h3>
+    <div class="bk-root" id="MCUE_table"></div>
     
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="SPINE_des"></h3>
+    <div class="bk-root" id="SPINE_table"></div>
+
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="PERSPEBSI_des"></h3>
+    <div class="bk-root" id="PERSPEBSI_table"></div>
         
     <py-script>
       import warnings
@@ -145,6 +174,9 @@
       ASMIUA_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='ASMIUA_table')
       PDSKJI_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='PDSKJI_table')
       PERAPI_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='PERAPI_table')
+      MCUE_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='MCUE_table')
+      SPINE_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='SPINE_table')
+      PERSPEBSI_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='PERSPEBSI_table')
       
       
       bar_A = pn.pane.Vega().servable(target='bar-plot1')
@@ -153,6 +185,12 @@
       bar_AS = pn.pane.Vega().servable(target='bar-plot4')
       bar_PDs = pn.pane.Vega().servable(target='bar-plot5')
       bar_PEs = pn.pane.Vega().servable(target='bar-plot6')
+      bar_mc = pn.pane.Vega().servable(target='bar-plot7')
+      bar_sp = pn.pane.Vega().servable(target='bar-plot8')
+      bar_pi = pn.pane.Vega().servable(target='bar-plot9')
+      bar_mcS = pn.pane.Vega().servable(target='bar-plot10')
+      bar_sps = pn.pane.Vega().servable(target='bar-plot11')
+      bar_pis = pn.pane.Vega().servable(target='bar-plot12')
       
       title = pn.pane.Markdown("""Pharma Pro Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2022""").servable(target='subtitle')
@@ -160,10 +198,16 @@
       ASMIUA_data = pn.pane.Markdown("""ASMIUA Dataset""").servable(target='ASMIUA_des')
       PDSKJI_data = pn.pane.Markdown("""PDSKJI Dataset""").servable(target='PDSKJI_des')
       PERAPI_data = pn.pane.Markdown("""PERAPI Dataset""").servable(target='PERAPI_des')
+      MCUE_data = pn.pane.Markdown("""MCUE Dataset""").servable(target='MCUE_des')
+      SPINE_data = pn.pane.Markdown("""SPINE Dataset""").servable(target='SPINE_des')
+      PERSPEBSI_data = pn.pane.Markdown("""PERSPEBSI Dataset""").servable(target='PERSPEBSI_des')
       
       qty_des = pn.pane.Markdown("""Analysis of ASMIUA Event""").servable(target='qty_des')
       per_des = pn.pane.Markdown("""Analysis of PDSKJI Event""").servable(target='per_des')
       pal_des = pn.pane.Markdown("""Analysis of PERAPI Event""").servable(target='pal_des')
+      mc_des = pn.pane.Markdown("""Analysis of MCUE Event""").servable(target='mc_des')
+      spi_des = pn.pane.Markdown("""Analysis of SPINE Event""").servable(target='spi_des')
+      pers_des = pn.pane.Markdown("""Analysis of PERSPEBSI Event""").servable(target='pers_des')
      
       
       df_ASMIUA = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/ASMIUA.csv'), low_memory=False)
@@ -186,6 +230,27 @@
       df_PERAPI.columns = df_PERAPI.columns.str.replace('.', '_')
       df_PERAPI['Tgl_Registrasi'] = pd.to_datetime(df_PERAPI['Tgl_Registrasi'])
       df_PERAPI['Kode'] = df_PERAPI['Kode_Peserta'].copy()
+
+      df_MCUE = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/MCUE.csv'), low_memory=False)
+      df_MCUE.name = 'M'
+      df_MCUE.columns = df_MCUE.columns.str.replace(' ', '_')
+      df_MCUE.columns = df_MCUE.columns.str.replace('.', '_')
+      df_MCUE['Tgl_Registrasi'] = pd.to_datetime(df_MCUE['Tgl_Registrasi'])
+      df_MCUE['Kode'] = df_MCUE['Kode_Peserta'].copy()
+      
+      df_SPINE = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/SPINE.csv'), low_memory=False)
+      df_SPINE.name = 'SP'
+      df_SPINE.columns = df_SPINE.columns.str.replace(' ', '_')
+      df_SPINE.columns = df_SPINE.columns.str.replace('.', '_')
+      df_SPINE['Tgl_Registrasi'] = pd.to_datetime(df_SPINE['Tgl_Registrasi'])
+      df_SPINE['Kode'] = df_SPINE['Kode_Peserta'].copy()
+
+      df_PERSPEBSI = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/PERSPEBSI.csv'), low_memory=False)
+      df_PERSPEBSI.name = 'PES'
+      df_PERSPEBSI.columns = df_PERSPEBSI.columns.str.replace(' ', '_')
+      df_PERSPEBSI.columns = df_PERSPEBSI.columns.str.replace('.', '_')
+      df_PERSPEBSI['Tgl_Registrasi'] = pd.to_datetime(df_PERSPEBSI['Tgl_Registrasi'])
+      df_PERSPEBSI['Kode'] = df_PERSPEBSI['Kode_Peserta'].copy()
 
       selection = alt.selection_single(fields=['Jenis_Registrasi'], bind='legend')
       selector = alt.selection_single(fields=['Jenis_Registrasi'])
@@ -261,6 +326,82 @@
                 )
                 .properties(
                     height=600, width=500, title='Jenis Registrasi PERAPI'
+                )
+                .add_selection(
+                    selection, selector
+                )
+                .transform_filter(
+                    selection&selector
+                ) 
+            )
+      def get_bar_n(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['Tgl_Registrasi'],A_copy['Kode_Peserta'],A_copy['Nama_Peserta'],A_copy['Jenis_Registrasi']])['Kode'].count()
+          A_m = A_m.reset_index()
+          if df.name == "M":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                  height=600, width=500, title='Jenis Registrasi MCUE'
+                )
+                .add_selection(
+                  selection, selector
+                )
+                .transform_filter(
+                  selection&selector
+                ) 
+            )
+          elif df.name == "SP":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Jenis Registrasi SPINE'
+                )
+                .add_selection(
+                    selection, selector
+                )
+                .transform_filter(
+                    selection&selector
+                ) 
+            )
+          else:
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Jenis Registrasi PERSPEBSI'
                 )
                 .add_selection(
                     selection, selector
@@ -350,10 +491,19 @@
       ASMIUA_table.value = df_ASMIUA
       PDSKJI_table.value = df_PDSKJI
       PERAPI_table.value = df_PERAPI
+
+      MCUE_table.value = df_ASMIUA
+      SPINE_table.value = df_PDSKJI
+      PERSPEBSI_table.value = df_PERAPI
       
       bar_A.object = get_bar_(df_ASMIUA)
       bar_PD.object = get_bar_(df_PDSKJI)
       bar_PE.object = get_bar_(df_PERAPI)
+
+      bar_mc.object = get_bar_n(df_MCUE)
+      bar_sp.object = get_bar_n(df_SPINE)
+      bar_pi.object = get_bar_n(df_PERSPEBSI)
+
 
       bar_AS.object = get_bar_s(df_ASMIUA)
       bar_PDs.object = get_bar_s(df_PDSKJI)
