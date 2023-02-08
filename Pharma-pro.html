@@ -75,14 +75,16 @@
   <body>
 
     <div class="container-fluid d-flex flex-column vh-100 overflow-hidden" id="container">
+        <!-- Side Navigation and Header -->
+        <nav class="navbar navbar-expand-md navbar-dark sticky-top shadow w3-blue-grey" id="header">
       
-	  <div class="app-header">
-	    <a class="w3-xlarge navbar-brand app-logo" href="/">
-	    <img src="https://github.com/karelchandra/Intern/blob/main/Pro_Health.png?raw=true" class="app-logo" width = "100" height = "3000">
-	    </a>
-	  <a class="title" href="" style="color: #efebe3;">Report Analysis</a>
-      </div>
-  
+        <div class="app-header">
+          <a class="w3-xlarge navbar-brand app-logo" href="/">
+          <img src="https://github.com/karelchandra/Intern/blob/main/Pro_Health.png?raw=true" class="app-logo" width = "100" height = "3000">
+          </a>
+        <a class="title" href="" style="color: #efebe3;">Report Analysis</a>
+        </div>
+        </nav>
 
 	  <div class="col mh-100 float-left w3-display-container" id="main">
 
@@ -94,22 +96,29 @@
 
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="qty_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot1"></div>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot1"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot2"></div>
+      </div>
+    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="per_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot2"></div>
-
+    
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="pal_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
     <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
-    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="combine_data"></h3>
-    <div class="bk-root" id="Main_table"></div>
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="ASMIUA_des"></h3>
+    <div class="bk-root" id="ASMIUA_table"></div>
     
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="PDSKJI_des"></h3>
+    <div class="bk-root" id="PDSKJI_table"></div>
+
+    <h4 class="w3-large w3-text-teal w3-padding-small" style = "font-weight: bold" id="PERAPI_des"></h3>
+    <div class="bk-root" id="PERAPI_table"></div>
     
         
     <py-script>
@@ -127,32 +136,136 @@
       warnings.simplefilter(action='ignore', category=FutureWarning)
       pn.config.sizing_mode = 'stretch_width'
 
-      Main_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='Main_table')
+      ASMIUA_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='ASMIUA_table')
+      PDSKJI_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='PDSKJI_table')
+      PERAPI_table = pn.widgets.Tabulator(pagination='remote', page_size=5).servable(target='PERAPI_table')
       
-      bar_qtys1s2 = pn.pane.Vega().servable(target='bar-plot1')
-      bar_persons1s2 = pn.pane.Vega().servable(target='bar-plot2')
-      bar_pal = pn.pane.Vega().servable(target='bar-plot3')
+      
+      bar_A = pn.pane.Vega().servable(target='bar-plot1')
+      bar_PD = pn.pane.Vega().servable(target='bar-plot2')
+      bar_PE = pn.pane.Vega().servable(target='bar-plot3')
       bar_loc = pn.pane.Vega().servable(target='bar-plot4')
       
       title = pn.pane.Markdown("""Pharma Pro Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2022""").servable(target='subtitle')
       table_des = pn.pane.Markdown("""Provided Dataset""").servable(target='table_des')
-      ASMIUA_data = pn.pane.Markdown("""ASMIUA Dataset""").servable(target='ASMIUA_data')
-      qty_des = pn.pane.Markdown("""Analysis of Quantity per Item""").servable(target='qty_des')
+      ASMIUA_data = pn.pane.Markdown("""ASMIUA Dataset""").servable(target='ASMIUA_des')
+      PDSKJI_data = pn.pane.Markdown("""PDSKJI Dataset""").servable(target='PDSKJI_des')
+      PERAPI_data = pn.pane.Markdown("""PERAPI Dataset""").servable(target='PERAPI_des')
+      
+      qty_des = pn.pane.Markdown("""Analysis of Event Type""").servable(target='qty_des')
       per_des = pn.pane.Markdown("""Analysis of Quantity per Person""").servable(target='per_des')
       pal_des = pn.pane.Markdown("""Analysis of Pallet and Location""").servable(target='pal_des')
      
       
-      df_all = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/ASMIUA.csv'), low_memory=False)
-      df_all.columns = df_all.columns.str.replace(' ', '_')
-      df_all.columns = df_all.columns.str.replace('.', ' ')
+      df_ASMIUA = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/ASMIUA.csv'), low_memory=False)
+      df_ASMIUA.name = 'A'
+      df_ASMIUA.columns = df_ASMIUA.columns.str.replace(' ', '_')
+      df_ASMIUA.columns = df_ASMIUA.columns.str.replace('.', '_')
+      df_ASMIUA['Tgl_Registrasi'] = pd.to_datetime(df_ASMIUA['Tgl_Registrasi'])
+      df_ASMIUA['Kode'] = df_ASMIUA['Kode_Peserta'].copy()
       
-      Main_table.value = df_all
+      df_PDSKJI = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/PDSKJI.csv'), low_memory=False)
+      df_PDSKJI.name = 'PD'
+      df_PDSKJI.columns = df_PDSKJI.columns.str.replace(' ', '_')
+      df_PDSKJI.columns = df_PDSKJI.columns.str.replace('.', '_')
+      df_PDSKJI['Tgl_Registrasi'] = pd.to_datetime(df_PDSKJI['Tgl_Registrasi'])
+      df_PDSKJI['Kode'] = df_PDSKJI['Kode_Peserta'].copy()
+
+      df_PERAPI = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/PERAPI.csv'), low_memory=False)
+      df_PERAPI.name = 'PE'
+      df_PERAPI.columns = df_PERAPI.columns.str.replace(' ', '_')
+      df_PERAPI.columns = df_PERAPI.columns.str.replace('.', '_')
+      df_PERAPI['Tgl_Registrasi'] = pd.to_datetime(df_PERAPI['Tgl_Registrasi'])
+      df_PERAPI['Kode'] = df_PERAPI['Kode_Peserta'].copy()
+
+      selection = alt.selection_single(fields=['Jenis_Registrasi'], bind='legend')
+      selector = alt.selection_single(fields=['Jenis_Registrasi'])
       
-      bar_qtys1s2.object = get_qty(df_all)
-      bar_persons1s2.object = get_person(df_all)
-      bar_pal.object = get_pal(df_all)
-      bar_loc.object = get_loc(df_all)
+      def get_bar_(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['Tgl_Registrasi'],A_copy['Kode_Peserta'],A_copy['Nama_Peserta'],A_copy['Jenis_Registrasi']])['Kode'].count()
+          A_m = A_m.reset_index()
+          if df.name == "A":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                height=600, width=500, title='Jenis Registrasi ASMIUA'
+                )
+                .add_selection(
+                selection, selector
+                )
+                .transform_filter(
+                selection&selector
+                ) 
+            )
+          elif df.name == "PD":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Jenis Registrasi PDSKJI'
+                )
+                .add_selection(
+                    selection, selector
+                )
+                .transform_filter(
+                    selection&selector
+                ) 
+            )
+          else:
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Jenis_Registrasi',
+                tooltip=['Tgl_Registrasi','Jenis_Registrasi', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Jenis_Registrasi',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Jenis Registrasi PERAPI'
+                )
+                .add_selection(
+                    selection, selector
+                )
+                .transform_filter(
+                    selection&selector
+                ) 
+            )
+
+      ASMIUA_table.value = df_ASMIUA
+      PDSKJI_table.value = df_PDSKJI
+      PERAPI_table.value = df_PERAPI
+      
+      bar_A.object = get_bar_(df_ASMIUA)
+      bar_PD.object = get_bar_(df_PDSKJI)
+      bar_PE.object = get_bar_(df_PERAPI)
       
       
 
