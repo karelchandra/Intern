@@ -98,16 +98,22 @@
     </header>
     <div class = "box">
         <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot1"></div>
-        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot2"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot4"></div>
       </div>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot3"></div>
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="per_des">
     </header>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot2"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot5"></div>
+      </div>
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id ="pal_des">
     </header>
-    <div class="bk-root" style="margin-top:10px; text-align: center;" id="bar-plot4"></div>
+    <div class = "box">
+        <div class="bk-root" style="margin-top:10px; margin-left: 5%;" id="bar-plot3"></div>
+        <div class="bk-root" style="margin-top:10px; margin-left: 43%;" id="bar-plot6"></div>
+      </div>
     
     <header style="font-size:30px;" class="w3-container w3-blue-grey w3-padding-small" id="table_des">
     </header>
@@ -144,7 +150,9 @@
       bar_A = pn.pane.Vega().servable(target='bar-plot1')
       bar_PD = pn.pane.Vega().servable(target='bar-plot2')
       bar_PE = pn.pane.Vega().servable(target='bar-plot3')
-      bar_loc = pn.pane.Vega().servable(target='bar-plot4')
+      bar_AS = pn.pane.Vega().servable(target='bar-plot4')
+      bar_PDs = pn.pane.Vega().servable(target='bar-plot5')
+      bar_PEs = pn.pane.Vega().servable(target='bar-plot6')
       
       title = pn.pane.Markdown("""Pharma Pro Report""").servable(target='title')
       subtitle = pn.pane.Markdown("""2022""").servable(target='subtitle')
@@ -153,9 +161,9 @@
       PDSKJI_data = pn.pane.Markdown("""PDSKJI Dataset""").servable(target='PDSKJI_des')
       PERAPI_data = pn.pane.Markdown("""PERAPI Dataset""").servable(target='PERAPI_des')
       
-      qty_des = pn.pane.Markdown("""Analysis of Event Type""").servable(target='qty_des')
-      per_des = pn.pane.Markdown("""Analysis of Quantity per Person""").servable(target='per_des')
-      pal_des = pn.pane.Markdown("""Analysis of Pallet and Location""").servable(target='pal_des')
+      qty_des = pn.pane.Markdown("""Analysis of ASMIUA Event""").servable(target='qty_des')
+      per_des = pn.pane.Markdown("""Analysis of PDSKJI Event""").servable(target='per_des')
+      pal_des = pn.pane.Markdown("""Analysis of PERAPI Event""").servable(target='pal_des')
      
       
       df_ASMIUA = pd.read_csv(open_url('https://raw.githubusercontent.com/karelchandra/Intern/main/ASMIUA.csv'), low_memory=False)
@@ -181,6 +189,9 @@
 
       selection = alt.selection_single(fields=['Jenis_Registrasi'], bind='legend')
       selector = alt.selection_single(fields=['Jenis_Registrasi'])
+
+      selections = alt.selection_single(fields=['Status_Pembayaran'], bind='legend')
+      selectors = alt.selection_single(fields=['Status_Pembayaran'])
       
       def get_bar_(df):
           A_copy = df.copy()
@@ -259,6 +270,83 @@
                 ) 
             )
 
+      def get_bar_s(df):
+          A_copy = df.copy()
+          A_m = A_copy.groupby([A_copy['Tgl_Registrasi'],A_copy['Kode_Peserta'],A_copy['Nama_Peserta'],A_copy['Status_Pembayaran']])['Kode'].count()
+          A_m = A_m.reset_index()
+          if df.name == "A":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Status_Pembayaran',
+                tooltip=['Tgl_Registrasi','Status_Pembayaran', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Status_Pembayaran',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Status_Pembayaran ASMIUA'
+                )
+                .add_selection(
+                  selections, selectors
+                )
+                .transform_filter(
+                  selections&selectors
+                ) 
+            )
+          elif df.name == "PD":
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Status_Pembayaran',
+                tooltip=['Tgl_Registrasi','Status_Pembayaran', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Status_Pembayaran',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Status_Pembayaran PDSKJI'
+                )
+                .add_selection(
+                    selections, selectors
+                )
+                .transform_filter(
+                    selections&selectors
+                ) 
+            )
+          else:
+            return(
+                alt.Chart(A_m)
+                .mark_bar()
+                .encode(
+                y='Kode',
+                x='Tgl_Registrasi',
+                color = 'Status_Pembayaran',
+                tooltip=['Tgl_Registrasi','Status_Pembayaran', 'Kode_Peserta', 'Nama_Peserta'],
+                order = alt.Order(
+                    'Status_Pembayaran',
+                    sort = 'ascending'
+                    )
+                )
+                .properties(
+                    height=600, width=500, title='Status_Pembayaran PERAPI'
+                )
+                .add_selection(
+                    selections, selectors
+                )
+                .transform_filter(
+                    selections&selectors
+                ) 
+            )
+
       ASMIUA_table.value = df_ASMIUA
       PDSKJI_table.value = df_PDSKJI
       PERAPI_table.value = df_PERAPI
@@ -266,6 +354,10 @@
       bar_A.object = get_bar_(df_ASMIUA)
       bar_PD.object = get_bar_(df_PDSKJI)
       bar_PE.object = get_bar_(df_PERAPI)
+
+      bar_AS.object = get_bar_s(df_ASMIUA)
+      bar_PDs.object = get_bar_s(df_PDSKJI)
+      bar_PEs.object = get_bar_s(df_PERAPI)
       
       
 
